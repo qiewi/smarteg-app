@@ -1,6 +1,6 @@
 {
-  "name": "SmartEG - Smart Warteg Management",
-  "short_name": "SmartEG",
+  "name": "Smarteg - Smart Warteg Management",
+  "short_name": "Smarteg",
   "description": "Smart Warteg Management App for Indonesian Food Stalls with AI and Voice Recognition",
   "start_url": "/",
   "display": "standalone",
