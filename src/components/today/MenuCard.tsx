@@ -14,33 +14,68 @@ interface MenuCardProps {
   sold: number;
   price: number;
   revenue: number;
-  onUpdate: (id: number, field: string, value: number) => void;
-  onSave: (id: number) => void;
+  onDataChange?: (id: number, data: { stock: number; sold: number; price: number; revenue: number }) => void;
 }
 
 export default function MenuCard({
   id,
   emoji,
   name,
-  stock,
-  sold,
-  price,
-  revenue,
-  onUpdate,
-  onSave,
+  stock: initialStock,
+  sold: initialSold,
+  price: initialPrice,
+  revenue: initialRevenue,
+  onDataChange,
 }: MenuCardProps) {
   const [isEditing, setIsEditing] = useState(false);
+  
+  // Current data state
+  const [currentStock, setCurrentStock] = useState(initialStock);
+  const [currentSold, setCurrentSold] = useState(initialSold);
+  const [currentPrice, setCurrentPrice] = useState(initialPrice);
+  const [currentRevenue, setCurrentRevenue] = useState(initialRevenue);
+  
+  // Editing state
+  const [editStock, setEditStock] = useState(initialStock);
+  const [editSold, setEditSold] = useState(initialSold);
+  const [editPrice, setEditPrice] = useState(initialPrice);
 
   const handleEdit = () => {
+    // Set edit values to current values when starting edit
+    setEditStock(currentStock);
+    setEditSold(currentSold);
+    setEditPrice(currentPrice);
     setIsEditing(true);
   };
 
   const handleSave = () => {
+    // Calculate new revenue
+    const newRevenue = editSold * editPrice;
+    
+    // Update current state
+    setCurrentStock(editStock);
+    setCurrentSold(editSold);
+    setCurrentPrice(editPrice);
+    setCurrentRevenue(newRevenue);
+    
+    // Notify parent of changes if callback provided
+    if (onDataChange) {
+      onDataChange(id, {
+        stock: editStock,
+        sold: editSold,
+        price: editPrice,
+        revenue: newRevenue,
+      });
+    }
+    
     setIsEditing(false);
-    onSave(id);
   };
 
   const handleCancel = () => {
+    // Reset edit values to current values
+    setEditStock(currentStock);
+    setEditSold(currentSold);
+    setEditPrice(currentPrice);
     setIsEditing(false);
   };
 
@@ -67,7 +102,7 @@ export default function MenuCard({
                     onClick={handleSave} 
                     className="h-9 w-9 p-0 bg-green-600 hover:bg-green-700"
                   >
-                    <Check className="w-4 h-4" />
+                    <Check className="w-4 h-4 text-white" />
                   </Button>
                   <Button 
                     size="sm" 
@@ -98,12 +133,12 @@ export default function MenuCard({
               {isEditing ? (
                 <Input
                   type="number"
-                  value={stock}
-                  onChange={(e) => onUpdate(id, 'stock', parseInt(e.target.value) || 0)}
+                  value={editStock}
+                  onChange={(e) => setEditStock(parseInt(e.target.value) || 0)}
                   className="h-8 text-sm"
                 />
               ) : (
-                <p className="font-semibold text-lg text-gray-900">{stock}</p>
+                <p className="font-semibold text-lg text-gray-900">{currentStock}</p>
               )}
             </div>
 
@@ -112,12 +147,12 @@ export default function MenuCard({
               {isEditing ? (
                 <Input
                   type="number"
-                  value={sold}
-                  onChange={(e) => onUpdate(id, 'sold', parseInt(e.target.value) || 0)}
+                  value={editSold}
+                  onChange={(e) => setEditSold(parseInt(e.target.value) || 0)}
                   className="h-8 text-sm"
                 />
               ) : (
-                <p className="font-semibold text-lg ">{sold}</p>
+                <p className="font-semibold text-lg">{currentSold}</p>
               )}
             </div>
 
@@ -126,21 +161,21 @@ export default function MenuCard({
               {isEditing ? (
                 <Input
                   type="number"
-                  value={price}
-                  onChange={(e) => onUpdate(id, 'price', parseInt(e.target.value) || 0)}
+                  value={editPrice}
+                  onChange={(e) => setEditPrice(parseInt(e.target.value) || 0)}
                   className="h-8 text-sm"
                 />
               ) : (
-                <p className="font-semibold text-sm ">
-                  Rp {price.toLocaleString('id-ID')}
+                <p className="font-semibold text-sm">
+                  Rp {currentPrice.toLocaleString('id-ID')}
                 </p>
               )}
             </div>
 
             <div className="rounded-lg p-3">
-              <p className="text-xs  mb-1">Pendapatan</p>
-              <p className="font-bold text-sm ">
-                Rp {revenue.toLocaleString('id-ID')}
+              <p className="text-xs mb-1">Pendapatan</p>
+              <p className="font-bold text-sm">
+                Rp {currentRevenue.toLocaleString('id-ID')}
               </p>
             </div>
           </div>

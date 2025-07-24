@@ -1,7 +1,7 @@
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { User, Settings, LogOut, Bell } from "lucide-react";
+import { User, Settings, LogOut } from "lucide-react";
 
 export default function ProfilePage() {
   return (
