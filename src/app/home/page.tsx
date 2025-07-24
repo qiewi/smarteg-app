@@ -16,9 +16,9 @@ export default function HomePage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 bg-gradient-to-br from-primary via-[#014B3E]/90 to-[#014B3E] mt-[-2rem]">
+      <div className="space-y-6 bg-gradient-to-br from-primary to-[#014B3E]">
         {/* Hero Section */}
-        <div className="relative overflow-hidden p-6 text-white rounded-b-3xl">
+        <div className="relative overflow-hidden px-6 pt-6 pb-0 text-white rounded-b-3xl">
           {/* Decorative Elements */}
           <div className="absolute top-4 right-4 opacity-20">
             <div className="w-20 h-20 rounded-full border-2 border-white/30"></div>
@@ -43,7 +43,7 @@ export default function HomePage() {
         </div>
 
         {/* Stats Sections */}
-        <div className="bg-white rounded-t-3xl p-4 space-y-6">
+        <div className="bg-white rounded-t-3xl p-4 space-y-6 pb-32">
           {/* Penjualan Section */}
           <div>
             <h2 className="text-lg font-semibold text-gray-800 mb-3">Penjualan</h2>
