@@ -106,7 +106,7 @@ export default function TodayPage() {
 
         {/* Section Summary */}
         <div className="flex flex-col space-y-3">
-          <Card className="border-0 bg-gradient-to-r from-primary to-[#014B3E] text-white">
+          <Card className="border-0 bg-gradient-to-br from-primary via-primary/90 to-accent text-white">
             <CardContent className="px-6">
               <div className="text-center space-y-4">
                 <div className="flex flex-col items-start justify-center gap-2">
