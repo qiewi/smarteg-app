@@ -3,6 +3,7 @@
 import { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import BottomNav from "@/components/common/BottomNav";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -31,38 +32,12 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       </motion.header>
 
       {/* Main Content */}
-      <main className="p-4">
+      <main className="p-4 pb-24">
         {children}
       </main>
 
-      {/* PWA Bottom Navigation */}
-      <motion.nav 
-        initial={{ y: 50 }}
-        animate={{ y: 0 }}
-        className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg"
-      >
-        <div className="grid grid-cols-4 gap-1 p-2">
-          <Button variant="ghost" className="flex flex-col items-center py-3 text-xs">
-            <div className="w-6 h-6 bg-blue-100 rounded mb-1"></div>
-            Dashboard
-          </Button>
-          <Button variant="ghost" className="flex flex-col items-center py-3 text-xs">
-            <div className="w-6 h-6 bg-green-100 rounded mb-1"></div>
-            Stock
-          </Button>
-          <Button variant="ghost" className="flex flex-col items-center py-3 text-xs">
-            <div className="w-6 h-6 bg-yellow-100 rounded mb-1"></div>
-            Sales
-          </Button>
-          <Button variant="ghost" className="flex flex-col items-center py-3 text-xs">
-            <div className="w-6 h-6 bg-red-100 rounded mb-1"></div>
-            Reports
-          </Button>
-        </div>
-      </motion.nav>
-
-      {/* Add bottom padding to avoid bottom nav overlap */}
-      <div className="h-20"></div>
+      {/* Bottom Navigation */}
+      <BottomNav />
     </div>
   );
 };
