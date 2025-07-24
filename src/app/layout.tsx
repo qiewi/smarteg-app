@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     'apple-mobile-web-app-status-bar-style': 'default',
     'apple-mobile-web-app-title': 'SmartEG',
     'application-name': 'SmartEG',
-    'msapplication-TileColor': '#014B3E',
+    'msapplication-TileColor': '#009098',
     'msapplication-config': '/browserconfig.xml',
   },
 }
@@ -45,7 +45,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: '#014B3E',
+  themeColor: '#009098',
   colorScheme: 'light',
 }
 

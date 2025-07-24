@@ -42,11 +42,11 @@ const BottomNav = () => {
         {/* Beranda */}
         <button
           onClick={() => handleNavigation(navItems[0].href)}
-          className={`flex flex-col items-center py-2 px-4 rounded-lg transition-colors ${
-            navItems[0].isActive 
-              ? "text-blue-600" 
-              : "text-gray-500 hover:text-gray-700"
-          }`}
+                     className={`flex flex-col items-center py-2 px-4 rounded-lg transition-colors ${
+             navItems[0].isActive 
+               ? "text-primary" 
+               : "text-gray-500 hover:text-primary"
+           }`}
         >
           <Home 
             size={24} 
@@ -64,7 +64,7 @@ const BottomNav = () => {
             className="absolute -top-12 left-1/2 transform -translate-x-1/2"
           >
             {/* Gradient Background Circle */}
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 via-blue-500 to-yellow-400 flex items-center justify-center shadow-xl">
+                         <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-xl">
               {/* Inner Circle */}
               <div className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
                 <Mic size={28} className="text-white" />
@@ -80,11 +80,11 @@ const BottomNav = () => {
         {/* Profile */}
         <button
           onClick={() => handleNavigation(navItems[1].href)}
-          className={`flex flex-col items-center py-2 px-4 rounded-lg transition-colors ${
-            navItems[1].isActive 
-              ? "text-blue-600" 
-              : "text-gray-500 hover:text-gray-700"
-          }`}
+                     className={`flex flex-col items-center py-2 px-4 rounded-lg transition-colors ${
+             navItems[1].isActive 
+               ? "text-primary" 
+               : "text-gray-500 hover:text-primary"
+           }`}
         >
           <User 
             size={24} 
