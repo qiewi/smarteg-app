@@ -3,6 +3,10 @@ const withPWA = require('next-pwa')({
   disable: process.env.NODE_ENV === 'development',
   register: true,
   skipWaiting: true,
+  buildExcludes: [/manifest\.json$/],
+  fallbacks: {
+    document: '/offline'
+  },
   runtimeCaching: [
     {
       urlPattern: /^https?.*/, 
@@ -20,6 +24,9 @@ const withPWA = require('next-pwa')({
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  turbopack: {
+    // Turbopack configuration (moved from experimental)
+  }
 }
 
 module.exports = withPWA(nextConfig) 

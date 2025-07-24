@@ -1,10 +1,5 @@
 import './globals.css'
-import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
-import { StagewiseToolbar } from '@stagewise/toolbar-next'
-import ReactPlugin from '@stagewise-plugins/react'
-
-const inter = Inter({ subsets: ['latin'] })
+import type { Metadata, Viewport } from 'next'
 
 export const metadata: Metadata = {
   title: 'SmartEG - Smart Warteg Management',
@@ -16,14 +11,6 @@ export const metadata: Metadata = {
   applicationName: 'SmartEG',
   generator: 'Next.js',
   manifest: '/manifest.json',
-  themeColor: '#000000',
-  colorScheme: 'light',
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
@@ -35,8 +22,6 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: '/favicon.ico' },
-      { url: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
-      { url: '/icons/icon-512x512.png', sizes: '512x512', type: 'image/png' },
     ],
     apple: [
       { url: '/apple-touch-icon.png' },
@@ -48,9 +33,18 @@ export const metadata: Metadata = {
     'apple-mobile-web-app-status-bar-style': 'default',
     'apple-mobile-web-app-title': 'SmartEG',
     'application-name': 'SmartEG',
-    'msapplication-TileColor': '#000000',
+    'msapplication-TileColor': '#014B3E',
     'msapplication-config': '/browserconfig.xml',
   },
+}
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: '#014B3E',
+  colorScheme: 'light',
 }
 
 export default function RootLayout({
@@ -61,59 +55,24 @@ export default function RootLayout({
   return (
     <html lang="id">
       <head>
-        <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#000000" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-        <link rel="shortcut icon" href="/favicon.ico" />
-        
-        {/* PWA iOS specific meta tags */}
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="SmartEG" />
-        
-        {/* Additional PWA meta tags */}
-        <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="application-name" content="SmartEG" />
-        <meta name="format-detection" content="telephone=no" />
-        
-        {/* Microsoft tile */}
-        <meta name="msapplication-TileColor" content="#000000" />
-        <meta name="msapplication-tap-highlight" content="no" />
-        
-        {/* Preconnect to external services */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-      </head>
-      <body className={inter.className}>
-        <div id="root">
-          {children}
-        </div>
-        
-        {/* Stagewise Toolbar - Only renders in development mode */}
-        <StagewiseToolbar 
-          config={{
-            plugins: [ReactPlugin]
-          }}
-        />
-        
-        {/* Service Worker Registration Script */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
               if ('serviceWorker' in navigator) {
-                window.addEventListener('load', function () {
-                  navigator.serviceWorker.register('/sw.js')
-                    .then(function (registration) {
-                      console.log('ServiceWorker registration successful');
-                    })
-                    .catch(function (err) {
-                      console.log('ServiceWorker registration failed: ', err);
-                    });
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/sw.js').then(function(registration) {
+                    console.log('ServiceWorker registration successful');
+                  }, function(err) {
+                    console.log('ServiceWorker registration failed: ', err);
+                  });
                 });
               }
             `,
           }}
         />
+      </head>
+      <body className={`font-sans antialiased`}>
+        {children}
       </body>
     </html>
   )
