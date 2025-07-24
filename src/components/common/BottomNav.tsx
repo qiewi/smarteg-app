@@ -12,8 +12,8 @@ const BottomNav = () => {
     {
       label: "Beranda",
       icon: Home,
-      href: "/dashboard",
-      isActive: pathname === "/dashboard"
+      href: "/home",
+      isActive: pathname === "/home"
     },
     {
       label: "Profile", 
