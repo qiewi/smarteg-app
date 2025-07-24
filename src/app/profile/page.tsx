@@ -1,22 +1,22 @@
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { User, Settings, LogOut, Bell } from "lucide-react";
 
 export default function ProfilePage() {
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="space-y-6 p-6">
         {/* Profile Header */}
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+        <Card className="border-0 bg-gradient-to-br from-primary via-primary/90 to-accent text-white">
+          <CardContent>
+            <div className="flex flex-col items-center space-y-4">
+              <div className="w-24 h-24 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
                 <User size={32} className="text-white" />
               </div>
-              <div>
+              <div className="flex flex-col items-center space-y-2">
                 <h2 className="text-xl font-semibold">User Name</h2>
-                <p className="text-gray-500">user@smarteg.com</p>
+                <p>user@smarteg.com</p>
               </div>
             </div>
           </CardContent>
@@ -24,8 +24,8 @@ export default function ProfilePage() {
 
         {/* Profile Options */}
         <div className="space-y-3">
-          <Card>
-            <CardContent className="p-4">
+          <Card className="py-4">
+            <CardContent className="px-4">
               <Button variant="ghost" className="w-full justify-start">
                 <Settings className="mr-3 h-5 w-5" />
                 Pengaturan
@@ -33,17 +33,8 @@ export default function ProfilePage() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="p-4">
-              <Button variant="ghost" className="w-full justify-start">
-                <Bell className="mr-3 h-5 w-5" />
-                Notifikasi
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4">
+          <Card className="py-4">
+            <CardContent className="px-4">
               <Button variant="ghost" className="w-full justify-start text-red-600 hover:text-red-700">
                 <LogOut className="mr-3 h-5 w-5" />
                 Keluar
