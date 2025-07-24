@@ -1,5 +1,7 @@
 import './globals.css'
 import type { Metadata, Viewport } from 'next'
+import { StagewiseToolbar } from '@stagewise/toolbar-next'
+import ReactPlugin from '@stagewise-plugins/react'
 
 export const metadata: Metadata = {
   title: 'SmartEG - Smart Warteg Management',
@@ -73,6 +75,11 @@ export default function RootLayout({
       </head>
       <body className={`font-sans antialiased`}>
         {children}
+        <StagewiseToolbar 
+          config={{
+            plugins: [ReactPlugin],
+          }}
+        />
       </body>
     </html>
   )
