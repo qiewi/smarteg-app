@@ -1,78 +1,71 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import LoginButton from '@/components/auth/LoginButton'
-import Header from '@/components/common/Header'
-import Footer from '@/components/common/Footer'
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-white to-secondary/5">
-      <Header />
-      <main className="flex items-center justify-center py-20">
-        <Card className="w-full max-w-md shadow-xl border-0 bg-white/80 backdrop-blur-sm">
-          <CardHeader className="text-center">
-            <div className="w-16 h-16 bg-gradient-primary rounded-2xl mx-auto mb-4 flex items-center justify-center">
-              <span className="text-2xl font-bold text-white">SG</span>
-            </div>
-            <CardTitle className="text-2xl font-bold text-primary">
-              Masuk ke SmartEG
-            </CardTitle>
-            <CardDescription className="text-gray-600">
-              Kelola Warteg Anda dengan teknologi AI dan Voice Recognition
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <LoginButton />
-            
-            <div className="text-center text-sm text-gray-600">
-              <p>Dengan masuk, Anda menyetujui</p>
-              <p>
-                <a href="#" className="text-primary hover:text-primary/80 hover:underline">
-                  Syarat dan Ketentuan
-                </a>
-                {' '}serta{' '}
-                <a href="#" className="text-primary hover:text-primary/80 hover:underline">
-                  Kebijakan Privasi
-                </a>
-              </p>
-            </div>
-            
-            <div className="border-t border-gray-200 pt-6">
-              <div className="text-center text-sm text-gray-600">
-                <p className="font-semibold mb-3 text-primary">Fitur yang tersedia:</p>
-                <div className="grid grid-cols-1 gap-2">
-                  <Badge variant="outline" className="justify-start border-secondary/20 text-secondary">
-                    <span className="w-2 h-2 bg-secondary rounded-full mr-2"></span>
-                    Voice-based Stock Recording
-                  </Badge>
-                  <Badge variant="outline" className="justify-start border-primary/20 text-primary">
-                    <span className="w-2 h-2 bg-primary rounded-full mr-2"></span>
-                    Real-time Sales Tracking
-                  </Badge>
-                  <Badge variant="outline" className="justify-start border-accent/20 text-accent">
-                    <span className="w-2 h-2 bg-accent rounded-full mr-2"></span>
-                    AI Supply Prediction
-                  </Badge>
-                  <Badge variant="outline" className="justify-start border-primary/20 text-primary">
-                    <span className="w-2 h-2 bg-primary rounded-full mr-2"></span>
-                    Waste Management Reports
-                  </Badge>
-                </div>
+    <div className="min-h-screen bg-gradient-to-br from-primary via-primary/90 to-accent flex flex-col">
+      {/* PWA Header */}
+      <div className="relative overflow-hidden px-6 pt-16 pb-8 text-white">
+        {/* Decorative Elements */}
+        <div className="absolute top-8 right-8 opacity-20">
+          <div className="w-16 h-16 rounded-full border-2 border-white/30"></div>
+        </div>
+        <div className="absolute bottom-0 right-0 opacity-10">
+          <div className="w-24 h-24 rounded-full bg-white/20 transform translate-x-6 translate-y-6"></div>
+        </div>
+
+        {/* Logo and Title */}
+        <div className="text-center relative z-10">
+          <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-3xl mx-auto mb-6 flex items-center justify-center border border-white/30">
+            <span className="text-3xl font-bold text-white">SG</span>
+          </div>
+          <h1 className="text-3xl font-bold mb-2">Masuk ke SmartEG</h1>
+          <p className="text-white/80 text-lg">Kelola Warteg Anda dengan teknologi AI</p>
+        </div>
+      </div>
+
+      {/* Login Content */}
+      <div className="bg-white rounded-t-3xl p-6 space-y-6 flex-1">
+        <div className="space-y-6">
+          <LoginButton />
+  
+        </div>
+
+        {/* Features Preview */}
+        <div className="mt-12 space-y-4">
+          <h3 className="text-lg font-semibold text-gray-800 text-center">Fitur Unggulan</h3>
+          <div className="grid grid-cols-1 gap-3">
+            <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+              <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                <span className="text-lg">🤖</span>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-800">AI Prediksi Penjualan</p>
+                <p className="text-xs text-gray-600">Prediksi akurat untuk stok dan penjualan</p>
               </div>
             </div>
             
-            <div className="bg-gradient-to-r from-secondary/10 to-accent/10 rounded-lg p-4 text-center">
-              <p className="text-sm font-medium text-primary mb-1">
-                🚀 Khusus UMKM Indonesia
-              </p>
-              <p className="text-xs text-gray-600">
-                Gratis 30 hari pertama • Setup 5 menit • Support 24/7
-              </p>
+            <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+              <div className="w-8 h-8 bg-accent/10 rounded-lg flex items-center justify-center">
+                <span className="text-lg">🎤</span>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-800">Voice Recognition</p>
+                <p className="text-xs text-gray-600">Update data dengan perintah suara</p>
+              </div>
             </div>
-          </CardContent>
-        </Card>
-      </main>
-      <Footer />
+            
+            <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+              <div className="w-8 h-8 bg-secondary/10 rounded-lg flex items-center justify-center">
+                <span className="text-lg">📊</span>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-800">Analytics Dashboard</p>
+                <p className="text-xs text-gray-600">Laporan penjualan real-time</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   )
 } 
