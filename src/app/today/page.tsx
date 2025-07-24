@@ -3,7 +3,7 @@
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Mic } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import MenuCard from "@/components/today/MenuCard";
@@ -129,7 +129,7 @@ export default function TodayPage() {
             value=""
             subtitle=""
             href="/ai"
-            icon={Mic}
+            emoji="🎤"
           />
         </div>
 

@@ -1,6 +1,5 @@
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, TrendingDown, PieChart } from "lucide-react";
 import PortraitCard from "@/components/home/PortraitCard";
 import LandscapeCard from "@/components/home/LandscapeCard";
 
@@ -52,16 +51,14 @@ export default function HomePage() {
                 title="Ringkasan Penjualan"
                 description="Penjualan hari ini"
                 href="/today"
-                icon={TrendingUp}
-                gradientType="sales"
+                emoji="📊"
               />
               
               <PortraitCard
                 title="Prediksi Penjualan"
                 description="Penjualan besok"
                 href="/prediction"
-                icon={PieChart}
-                gradientType="prediction"
+                emoji="🔮"
               />
             </div>
           </div>
@@ -75,7 +72,7 @@ export default function HomePage() {
               value="-8%"
               subtitle="Dari minggu lalu"
               href="/waste"
-              icon={TrendingDown}
+              emoji="♻️"
             />
           </div>
         </div>

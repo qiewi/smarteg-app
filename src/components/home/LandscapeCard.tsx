@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
-import { LucideIcon, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 
 interface LandscapeCardProps {
   title: string;
@@ -8,7 +8,7 @@ interface LandscapeCardProps {
   value?: string;
   subtitle?: string;
   href: string;
-  icon: LucideIcon;
+  emoji: string;
 }
 
 export default function LandscapeCard({
@@ -17,28 +17,29 @@ export default function LandscapeCard({
   value,
   subtitle,
   href,
-  icon: Icon,
+  emoji,
 }: LandscapeCardProps) {
   return (
     <Link href={href}>
-      <Card className="hover:shadow-lg transition-all duration-300 group border-0 rounded-3xl bg-gradient-to-tl from-[#014B3E] to-[#678E79] text-white py-4">
-        <CardContent className="px-4">
+      <Card className="hover:shadow-lg transition-all duration-300 group border border-gray-200 bg-white rounded-3xl py-4">
+        <CardContent className="p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
-                <Icon className="w-6 h-6 text-white" />
+              <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center flex-shrink-0">
+                <span className="text-xl">{emoji}</span>
               </div>
-              <div className="min-w-0 flex-1 justify-center">
-                <h3 className="text-sm text-white font-semibold drop-shadow-sm">{title}</h3>
-                <p className="text-xs text-white/90">{description}</p>
+              <div className="min-w-0 flex-1">
+                <h3 className="text-sm text-gray-900 font-semibold">{title}</h3>
+                <p className="text-xs text-gray-600">{description}</p>
                 {(value || subtitle) && (
                   <div className="flex items-center space-x-2 mt-2">
-                    {value && <span className="text-lg text-white font-bold drop-shadow-sm">{value}</span>}
-                    {subtitle && <span className="text-xs text-white/90">{subtitle}</span>}
+                    {value && <span className="text-lg text-gray-900 font-bold">{value}</span>}
+                    {subtitle && <span className="text-xs text-gray-600">{subtitle}</span>}
                   </div>
                 )}
               </div>
             </div>
+            <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-gray-600 group-hover:translate-x-1 transition-all" />
           </div>
         </CardContent>
       </Card>
