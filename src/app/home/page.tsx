@@ -46,20 +46,33 @@ export default function HomePage() {
           {/* Penjualan Section */}
           <div>
             <h2 className="text-lg font-semibold text-gray-800 mb-3">Penjualan</h2>
-            <div className="flex flex-row gap-3">
-              <PortraitCard
-                title="Ringkasan Penjualan"
-                description="Penjualan hari ini"
-                href="/today"
-                emoji="📊"
-              />
+            <div className="flex gap-3 overflow-x-auto pb-2 [-webkit-scrollbar]:hidden [scrollbar-width:none]">
+              <div className="flex-shrink-0 w-40">
+                <PortraitCard
+                  title="Ringkasan Penjualan"
+                  description="Penjualan hari ini"
+                  href="/today"
+                  emoji="📊"
+                />
+              </div>
               
-              <PortraitCard
-                title="Prediksi Penjualan"
-                description="Penjualan besok"
-                href="/prediction"
-                emoji="🔮"
-              />
+              <div className="flex-shrink-0 w-40">
+                <PortraitCard
+                  title="Prediksi Penjualan"
+                  description="Penjualan besok"
+                  href="/prediction"
+                  emoji="🔮"
+                />
+              </div>
+              
+              <div className="flex-shrink-0 w-40">
+                <PortraitCard
+                  title="Laporan Penjualan"
+                  description="Semua penjualan"
+                  href="/dashboard"
+                  emoji="📈"
+                />
+              </div>
             </div>
           </div>
 

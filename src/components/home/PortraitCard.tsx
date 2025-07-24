@@ -15,7 +15,7 @@ export default function PortraitCard({
   emoji,
 }: PortraitCardProps) {
   return (
-    <Link href={href} className="flex-1">
+    <Link href={href} className="block w-full">
       <Card className="hover:shadow-lg transition-all duration-300 group border border-gray-200 bg-white rounded-3xl h-40">
         <CardContent className="p-4 h-full">
           <div className="flex flex-col items-start justify-center h-full space-y-3">
