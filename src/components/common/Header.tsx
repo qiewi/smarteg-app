@@ -49,7 +49,7 @@ const Header = () => {
               <div className="w-12 h-12 md:w-32 md:h-32 flex items-center justify-center overflow-hidden">
                 <Image 
                   src="/navbar-logo.png" 
-                  alt="SmartEG Logo" 
+                  alt="Smarteg Logo" 
                   width={100} 
                   height={100}
                   className="hidden md:block w-32 h-32 object-contain"
@@ -57,7 +57,7 @@ const Header = () => {
                 />
                 <Image 
                   src="/icon-only.png" 
-                  alt="SmartEG Logo" 
+                  alt="Smarteg Logo" 
                   width={40} 
                   height={40}
                   className="md:hidden w-10 h-10 object-contain"

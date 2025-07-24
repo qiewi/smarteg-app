@@ -25,7 +25,7 @@ export default function DashboardPage() {
           className="text-center"
         >
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            Selamat Datang di SmartEG
+            Selamat Datang di Smarteg
           </h1>
           <p className="text-gray-600">{todayDate}</p>
           <Badge variant="outline" className="mt-2">

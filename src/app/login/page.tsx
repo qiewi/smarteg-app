@@ -15,7 +15,7 @@ export default function LoginPage() {
               <span className="text-2xl font-bold text-white">SG</span>
             </div>
             <CardTitle className="text-2xl font-bold text-primary">
-              Masuk ke SmartEG
+              Masuk ke Smarteg
             </CardTitle>
             <CardDescription className="text-gray-600">
               Kelola Warteg Anda dengan teknologi AI dan Voice Recognition

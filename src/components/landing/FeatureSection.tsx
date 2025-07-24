@@ -112,13 +112,13 @@ const FeatureSection = () => {
           className="text-center mb-16"
         >
           <div className="flex items-center justify-center mb-4">
-            <Badge className="bg-gray-100 text-gray-700 border-gray-200">
+            <Badge className="bg-green-100 text-green-700 border-green-200">
               <Banknote className="-ms-0.5 opacity-60" size={12} aria-hidden="true" />
               Fitur Utama
             </Badge>
           </div>
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 mx-20">
-          Prediksi AI dan Voice-to-Text untuk Warteg Berkelanjutan
+          Prediksi AI dan Voice-to-Text untuk Warteg <span className="font-eb-garamond italic font-normal">Berkelanjutan</span>
           </h2>
         </motion.div>
 

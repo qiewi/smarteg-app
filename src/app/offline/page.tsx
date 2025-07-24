@@ -37,7 +37,7 @@ export default function OfflinePage() {
             </svg>
           </div>
           <h1 className="text-2xl font-bold text-[#014B3E] mb-2">
-            SmartEG Offline
+            Smarteg Offline
           </h1>
           <p className="text-gray-600 mb-4">
             Tidak ada koneksi internet. Aplikasi akan otomatis tersambung kembali saat koneksi tersedia.

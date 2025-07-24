@@ -18,7 +18,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         className="bg-white shadow-sm border-b sticky top-0 z-10"
       >
         <div className="px-4 py-3 flex justify-between items-center">
-          <h1 className="text-xl font-bold text-primary">SmartEG Dashboard</h1>
+          <h1 className="text-xl font-bold text-primary">Smarteg Dashboard</h1>
           <div className="flex items-center space-x-2">
             <Button variant="ghost" size="sm">
               Profile

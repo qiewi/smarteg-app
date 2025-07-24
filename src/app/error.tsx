@@ -14,7 +14,7 @@ export default function Error({
           Terjadi Kesalahan
         </h1>
         <p className="text-gray-600 mb-6">
-          Maaf, terjadi kesalahan pada aplikasi SmartEG.
+          Maaf, terjadi kesalahan pada aplikasi Smarteg.
         </p>
         <div className="space-y-4">
           <button
