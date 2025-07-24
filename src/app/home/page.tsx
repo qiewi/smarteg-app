@@ -16,7 +16,7 @@ export default function HomePage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 bg-gradient-to-br from-primary to-[#014B3E]">
+      <div className="space-y-6 bg-gradient-to-br from-primary via-primary/90 to-accent">
         {/* Hero Section */}
         <div className="relative overflow-hidden px-6 pt-6 pb-0 text-white rounded-b-3xl">
           {/* Decorative Elements */}
