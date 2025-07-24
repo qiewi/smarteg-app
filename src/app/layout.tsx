@@ -4,19 +4,19 @@ import { StagewiseToolbar } from '@stagewise/toolbar-next'
 import ReactPlugin from '@stagewise-plugins/react'
 
 export const metadata: Metadata = {
-  title: 'SmartEG - Smart Warteg Management',
-  description: 'Smart Warteg Management App for Indonesian Food Stalls',
-  keywords: ['warteg', 'management', 'indonesia', 'food', 'umkm', 'ai', 'voice'],
-  authors: [{ name: 'SmartEG Team' }],
-  creator: 'SmartEG',
-  publisher: 'SmartEG',
-  applicationName: 'SmartEG',
+  title: 'Smarteg - Kurangi Limbah, Tingkatkan Efisiensi, Maksimalkan Pendapatan',
+  description: 'Smarteg adalah aplikasi manajemen Warteg berbasis suara yang membantu UMKM Indonesia mengurangi limbah makanan, meningkatkan efisiensi operasional, dan memaksimalkan pendapatan melalui pengelolaan stok dan prediksi kebutuhan yang cerdas.',
+  keywords: ['warteg', 'manajemen limbah', 'efisiensi operasional', 'umkm', 'pengelolaan stok', 'pendapatan warteg', 'ai', 'aplikasi suara', 'indonesia', 'sustainability'],
+  authors: [{ name: 'Tim Smarteg' }],
+  creator: 'Tim Smarteg',
+  publisher: 'Smarteg',
+  applicationName: 'Smarteg',
   generator: 'Next.js',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'SmartEG',
+    title: 'Smarteg',
   },
   formatDetection: {
     telephone: false,
@@ -33,10 +33,12 @@ export const metadata: Metadata = {
     'mobile-web-app-capable': 'yes',
     'apple-mobile-web-app-capable': 'yes',
     'apple-mobile-web-app-status-bar-style': 'default',
-    'apple-mobile-web-app-title': 'SmartEG',
-    'application-name': 'SmartEG',
+    'apple-mobile-web-app-title': 'Smarteg',
+    'application-name': 'Smarteg',
     'msapplication-TileColor': '#014B3E',
     'msapplication-config': '/browserconfig.xml',
+    'theme-color': '#014B3E',
+    'description': 'Aplikasi PWA untuk Warteg yang membantu mengurangi limbah makanan, meningkatkan efisiensi operasional, dan memaksimalkan pendapatan melalui pengelolaan stok dan prediksi kebutuhan yang cerdas.',
   },
 }
 
@@ -61,9 +63,14 @@ export default function RootLayout({
         <meta name="theme-color" content="#014B3E" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="SmartEG" />
+        <meta name="apple-mobile-web-app-title" content="Smarteg" />
         <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="description" content="Smarteg adalah aplikasi manajemen Warteg berbasis suara yang membantu UMKM Indonesia mengurangi limbah makanan, meningkatkan efisiensi operasional, dan memaksimalkan pendapatan melalui pengelolaan stok dan prediksi kebutuhan yang cerdas." />
+        <meta name="keywords" content="warteg, manajemen limbah, efisiensi operasional, umkm, pengelolaan stok, pendapatan warteg, ai, aplikasi suara, indonesia, sustainability" />
+        <meta name="author" content="Tim Smarteg" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="icon" href="/favicon.ico" />
+        <link rel="preload" href="/bg-hero.jpg" as="image" type="image/jpeg" />
         <script
           dangerouslySetInnerHTML={{
             __html: `

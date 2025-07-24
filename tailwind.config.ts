@@ -9,6 +9,11 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        'argesta': ['Argesta Display', 'serif'],
+        'eb-garamond': ['EB Garamond', 'serif'],
+        'inter': ['Inter', 'sans-serif'],
+      },
       colors: {
         primary: {
           DEFAULT: "#014B3E",
