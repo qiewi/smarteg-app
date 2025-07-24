@@ -21,7 +21,7 @@ export default function LandscapeCard({
 }: LandscapeCardProps) {
   return (
     <Link href={href}>
-      <Card className="hover:shadow-lg transition-all duration-300 group border border-gray-200 bg-white rounded-3xl py-4">
+      <Card className="hover:shadow-lg transition-all duration-300 group border border-gray-200 bg-white rounded-3xl py-2">
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
