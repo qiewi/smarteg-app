@@ -71,6 +71,7 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link rel="icon" href="/favicon.ico" />
         <link rel="preload" href="/bg-hero.jpg" as="image" type="image/jpeg" />
+        <link rel="preload" href="/bg-cta.jpg" as="image" type="image/jpeg" />
         <script
           dangerouslySetInnerHTML={{
             __html: `

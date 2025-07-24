@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ArrowUpRight } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function CTASection() {
   return (
@@ -17,7 +18,16 @@ export default function CTASection() {
           transition={{ duration: 0.6 }}
           className="max-w-6xl mx-auto"
         >
-          <Card className="bg-cover bg-center bg-no-repeat rounded-3xl shadow-lg min-h-[300px] relative overflow-hidden" style={{ backgroundImage: 'url(/bg-cta.jpg)' }}>
+          <Card className="rounded-3xl shadow-lg min-h-[300px] relative overflow-hidden">
+            <Image
+              src="/bg-cta.jpg"
+              alt="CTA Background"
+              fill
+              className="object-cover object-center"
+              loading="eager"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
+              quality={85}
+            />
             <div className="absolute inset-0 bg-black/30 backdrop-blur-sm"></div>
             <CardContent className="p-8 md:p-12 h-full relative z-10">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center h-full">

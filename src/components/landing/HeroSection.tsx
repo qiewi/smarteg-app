@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ZapIcon, ArrowUpRight } from "lucide-react";
+import Image from "next/image";
 
 const HeroSection = () => {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
@@ -31,11 +32,74 @@ const HeroSection = () => {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-cover bg-center bg-no-repeat" style={{ backgroundImage: 'url(/bg-hero.jpg)' }}>
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      {/* Background Image */}
+      <Image
+        src="/bg-hero.jpg"
+        alt="Hero Background"
+        fill
+        className="object-cover object-center"
+        priority
+        sizes="100vw"
+        quality={90}
+      />
       {/* Dark overlay with blur */}
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+      
+      {/* Floating SDGs */}
+      <div className="absolute inset-0 pointer-events-none z-20">
+        {/* SDG 2 - Zero Hunger - Kiri atas */}
+        <div className="absolute top-20 left-8 w-24 h-24 opacity-40 blur-sm rounded-sm overflow-hidden">
+          <Image
+            src="/sdg/E_WEB_02.png"
+            alt="SDG 2 - Zero Hunger"
+            fill
+            className="object-cover"
+          />
+        </div>
+        
+        {/* SDG 8 - Decent Work - Kanan atas */}
+        <div className="absolute top-16 right-12 w-28 h-28 opacity-35 blur-md rounded-sm overflow-hidden">
+          <Image
+            src="/sdg/E_WEB_08.png"
+            alt="SDG 8 - Decent Work"
+            fill
+            className="object-cover"
+          />
+        </div>
+        
+        {/* SDG 9 - Industry Innovation - Kiri tengah */}
+        <div className="absolute top-[300px] left-24 w-20 h-20 opacity-45 blur-[2px] rounded-lg overflow-hidden">
+          <Image
+            src="/sdg/E_WEB_09.png"
+            alt="SDG 9 - Industry Innovation"
+            fill
+            className="object-cover"
+          />
+        </div>
+        
+        {/* SDG 12 - Responsible Consumption - Kanan tengah */}
+        <div className="absolute top-[300px] right-24 w-24 h-24 opacity-40 blur-[2px] rounded-lg overflow-hidden">
+          <Image
+            src="/sdg/E_WEB_12.png"
+            alt="SDG 12 - Responsible Consumption"
+            fill
+            className="object-cover"
+          />
+        </div>
+        
+        {/* SDG 13 - Climate Action - Tengah bawah */}
+        <div className="absolute bottom-32 left-1/2 transform -translate-x-1/2 w-32 h-32 opacity-30 blur-xl rounded-3xl overflow-hidden">
+          <Image
+            src="/sdg/E_WEB_13.png"
+            alt="SDG 13 - Climate Action"
+            fill
+            className="object-cover"
+          />
+        </div>
+      </div>
       {/* Content */}
-      <div className="relative z-10 container mx-auto px-4 text-center mt-32">
+      <div className="relative z-30 container mx-auto px-4 text-center mt-32">
         <div className="max-w-5xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
