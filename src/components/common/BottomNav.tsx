@@ -58,8 +58,6 @@ const BottomNav = () => {
         {/* Catat (Center Button) - Absolutely positioned to overflow */}
         <div className="relative flex flex-col items-center">
           <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
             onClick={handleRecord}
             className="absolute -top-12 left-1/2 transform -translate-x-1/2"
           >
