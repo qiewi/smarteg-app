@@ -71,7 +71,7 @@ export default function DashboardPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 p-6">
+      <div className="space-y-6">
         {/* Header Section */}
         <section>
           <div className="flex items-center space-x-4">
@@ -131,7 +131,7 @@ export default function DashboardPage() {
         </section>
 
         {/* Menu Cards Section */}
-        <section className="pb-32">
+        <section>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-800">Daftar Menu</h2>
             <Link href="/dashboard/add-menu">

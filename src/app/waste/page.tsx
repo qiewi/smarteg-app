@@ -8,7 +8,7 @@ import Link from "next/link";
 export default function WastePage() {
   return (
     <DashboardLayout>
-      <div className="space-y-6 p-6">
+      <div className="space-y-6">
         {/* Header Section */}
         <section>
           <div className="flex items-center space-x-4">
@@ -171,7 +171,7 @@ export default function WastePage() {
         </section>
 
         {/* Environmental Impact Section */}
-        <section className="pb-32">
+        <section>
           <Card className="border-2 border-dashed border-gray-200 bg-gray-50">
             <CardContent className="p-8 text-center">
               <div className="text-4xl mb-4">🌱</div>

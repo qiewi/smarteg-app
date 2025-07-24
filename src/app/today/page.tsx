@@ -90,7 +90,7 @@ export default function TodayPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 p-6">
+      <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center space-x-4">
           <Link href="/home">
@@ -134,7 +134,7 @@ export default function TodayPage() {
         </div>
 
         {/* Section Cards */}
-        <div className="space-y-3 pb-32">
+        <div className="space-y-3">
           <h2 className="text-lg font-semibold text-gray-800">Daftar Menu</h2>
           {menuItems.map((item) => (
             <MenuCard

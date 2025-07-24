@@ -14,7 +14,7 @@ export default function HomePage() {
   const wartegName = "Barokah"; // This could come from user data
 
   return (
-    <DashboardLayout>
+    <DashboardLayout noPadding>
       <div className="space-y-6 bg-gradient-to-br from-primary via-primary/90 to-accent">
         {/* Hero Section */}
         <div className="relative overflow-hidden px-6 pt-6 pb-0 text-white rounded-b-3xl">

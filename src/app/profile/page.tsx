@@ -6,7 +6,7 @@ import { User, Settings, LogOut, Bell } from "lucide-react";
 export default function ProfilePage() {
   return (
     <DashboardLayout>
-      <div className="space-y-6 p-6">
+      <div className="space-y-6">
         {/* Profile Header */}
         <Card className="border-0 bg-gradient-to-br from-primary via-primary/90 to-accent text-white">
           <CardContent>

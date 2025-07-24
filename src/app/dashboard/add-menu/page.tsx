@@ -123,7 +123,7 @@ export default function AddMenuPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 p-6">
+      <div className="space-y-6">
         {/* Header Section */}
         <section>
           <div className="flex items-center space-x-4">
@@ -140,7 +140,7 @@ export default function AddMenuPage() {
         </section>
 
         {/* Form Section */}
-        <section className="pb-32">
+        <section>
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">

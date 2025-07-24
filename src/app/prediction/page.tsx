@@ -8,7 +8,7 @@ import Link from "next/link";
 export default function PredictionPage() {
   return (
     <DashboardLayout>
-      <div className="space-y-6 p-6">
+      <div className="space-y-6">
         {/* Header Section */}
         <section>
           <div className="flex items-center space-x-4">
@@ -85,7 +85,7 @@ export default function PredictionPage() {
         </section>
 
         {/* AI Reasoning Section */}
-        <section className="pb-32">
+        <section>
           <Card className="border border-gray-200 bg-white">
             <CardContent className="p-6">
               <div className="text-center mb-6">
