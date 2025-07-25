@@ -47,7 +47,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: '#014B3E',
+  themeColor: '#009098',
   colorScheme: 'light',
 }
 
@@ -72,6 +72,12 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.ico" />
         <link rel="preload" href="/bg-hero.jpg" as="image" type="image/jpeg" />
         <link rel="preload" href="/bg-cta.jpg" as="image" type="image/jpeg" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap"
+          rel="stylesheet"
+        />
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -88,7 +94,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`font-sans antialiased`}>
+      <body className={`font-instrument antialiased`}>
         {children}
         <StagewiseToolbar 
           config={{

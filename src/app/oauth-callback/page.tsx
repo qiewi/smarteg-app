@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { authAPI } from '@/lib/api';
 
 function OAuthCallbackContent() {
   const router = useRouter();
@@ -15,8 +16,6 @@ function OAuthCallbackContent() {
   useEffect(() => {
     const handleOAuthCallback = async () => {
       try {
-        const token = searchParams.get('token');
-        const code = searchParams.get('code');
         const error = searchParams.get('error');
 
         if (error) {
@@ -25,26 +24,42 @@ function OAuthCallbackContent() {
           return;
         }
 
-        if (!token && !code) {
-          setStatus('error');
-          setMessage('No authorization token or code received');
-          return;
-        }
-
-        // TODO: Implement actual OAuth token validation
-        // This will be implemented in Task 2
-        console.log('OAuth callback received:', { token, code });
+        // Get JWT token from URL parameters or call refresh-token
+        console.log('Processing OAuth callback...');
         
-        // Simulate API call to validate token
-        setTimeout(() => {
+        try {
+          const token = searchParams.get('token');
+          
+          if (token) {
+            // Token provided in URL parameter
+            localStorage.setItem('auth_token', token);
+            console.log('JWT token saved from URL parameter');
+          } else {
+            // Get token from refresh-token API
+            const tokenResponse = await authAPI.refreshToken();
+            const responseData = tokenResponse as any;
+            
+            if (responseData?.token) {
+              localStorage.setItem('auth_token', responseData.token);
+              console.log('JWT token saved from refresh-token API');
+            } else {
+              throw new Error('No JWT token received');
+            }
+          }
+          
           setStatus('success');
           setMessage('Authentication successful! Redirecting to dashboard...');
           
-          // Redirect to dashboard after 2 seconds
+          // Redirect to home page after 2 seconds
           setTimeout(() => {
-            router.push('/dashboard');
+            router.push('/home');
           }, 2000);
-        }, 1500);
+          
+        } catch (tokenError) {
+          console.error('Failed to get JWT token:', tokenError);
+          setStatus('error');
+          setMessage('Failed to retrieve authentication token');
+        }
 
       } catch (err) {
         setStatus('error');
@@ -61,7 +76,7 @@ function OAuthCallbackContent() {
   };
 
   const handleManualRedirect = () => {
-    router.push('/dashboard');
+    router.push('/home');
   };
 
   return (
