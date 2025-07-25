@@ -31,7 +31,7 @@ export default function LoginPage() {
                 Masuk ke <span className="text-white text-4xl font-eb-garamond italic font-normal leading-tight">Smarteg</span>
               </h1>
               <p className="text-white/80 text-base">
-                Kelola warteg Anda dengan teknologi AI
+                Kelola limbah dan efisiensi warteg <br/> Anda dengan teknologi AI
               </p>
             </div>
           </div>
