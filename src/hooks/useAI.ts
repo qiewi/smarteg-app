@@ -404,7 +404,18 @@ export function useVoiceCommands(getNewToken: () => Promise<{ name: string }>) {
   const processCommand = useCallback(async (commandText: string) => {
     if (!commandText) return;
 
+    // Immediately stop listening to prevent interference from new speech
+    if (recognitionRef.current && isListening) {
+      console.log('🛑 Stopping voice recognition to process command');
+      VoiceProcessor.stopListening(recognitionRef.current);
+      setIsListening(false);
+    }
+    
     setIsProcessing(true);
+    // Clear transcripts to prevent confusion
+    setTranscript("");
+    setFinalTranscript("");
+    
     let feedbackMessage = "Maaf, terjadi kesalahan.";
     
     try {
@@ -419,7 +430,7 @@ export function useVoiceCommands(getNewToken: () => Promise<{ name: string }>) {
           break;
         case 'RECORD_SALE':
           await api.salesAPI.recordSales(command.payload);
-          const itemNames = command.payload.items.map((i: any) => `${i.counts} ${i.name}`).join(', ');
+          const itemNames = command.payload.map((i: any) => `${i.counts} ${i.name}`).join(', ');
           feedbackMessage = `Sip, pesanan ${itemNames} sudah dicatat.`;
           break;
         case 'DAILY_REPORT':
@@ -447,13 +458,17 @@ export function useVoiceCommands(getNewToken: () => Promise<{ name: string }>) {
     } finally {
       await speak(feedbackMessage);
       setIsProcessing(false);
-      setTranscript("");
-      setFinalTranscript("");
+      // Clear any remaining transcripts and add small delay to ensure clean state
+      setTimeout(() => {
+        setTranscript("");
+        setFinalTranscript("");
+      }, 100);
     }
   }, [getNewToken, speak]);
 
   useEffect(() => {
-    if (finalTranscript && !isProcessing) {
+    if (finalTranscript && !isProcessing && finalTranscript.trim().length > 0) {
+      console.log('🎯 Processing voice command:', finalTranscript);
       processCommand(finalTranscript);
     }
   }, [finalTranscript, isProcessing, processCommand]);
@@ -461,6 +476,11 @@ export function useVoiceCommands(getNewToken: () => Promise<{ name: string }>) {
   const startListening = useCallback(async () => {
     if (!recognitionRef.current) {
       console.error('Recognition not initialized');
+      return;
+    }
+
+    if (isProcessing) {
+      console.log('⏳ Cannot start listening: currently processing a command');
       return;
     }
 
@@ -477,6 +497,7 @@ export function useVoiceCommands(getNewToken: () => Promise<{ name: string }>) {
         },
         (final: VoiceCommand) => {
           console.log('Final transcript:', final.text);
+          setIsListening(false);
           setFinalTranscript(final.text);
           setIsListening(false);
         }
@@ -485,7 +506,7 @@ export function useVoiceCommands(getNewToken: () => Promise<{ name: string }>) {
       console.error("Error during listening:", e);
       setIsListening(false);
     }
-  }, []);
+  }, [isProcessing]);
 
   const stopListening = useCallback(() => {
     if (recognitionRef.current) {
