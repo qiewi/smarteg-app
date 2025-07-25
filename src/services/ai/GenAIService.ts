@@ -69,7 +69,7 @@ export class GenAIService {
           },
         });
 
-        console.log('ℹ️ Sending prompt to live session:', prompt);
+        console.log('ℹ️ Sending prompt to live session:', prompt.slice(0, 100));
         session.sendRealtimeInput({ text: prompt });
       } catch (e) {
         reject(e);

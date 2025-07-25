@@ -295,6 +295,7 @@ export function useVoiceCommands(getNewToken: () => Promise<{ name: string }>) {
     timestamp: number;
     error?: string;
   } | null>(null);
+  const [isGeneratingSocialPost, setIsGeneratingSocialPost] = useState(false);
 
   useEffect(() => {
     const init = async () => {
@@ -346,13 +347,24 @@ export function useVoiceCommands(getNewToken: () => Promise<{ name: string }>) {
 
   // Generate social post with image
   const generateSocialPost = useCallback(async (payload: any) => {
+    setIsGeneratingSocialPost(true);
+    
     try {
       const menuName = payload.name;
       const status = payload.status; // 'ready' or 'sold_out'
       
+      // Set initial loading state
+      setVoiceSocialPostResult({
+        imageData: null,
+        menuName,
+        status,
+        timestamp: Date.now()
+      });
+      
       // Create image prompt based on menu item and status
       const imagePrompt = `Create an appetizing, professional food photography image of ${menuName}, a delicious Indonesian dish. The image should be bright, colorful, and make the food look irresistible. ${status === 'ready' ? 'Show it as freshly prepared and ready to eat. With text saying "READY TO SERVE!"' : 'Show it with a subtle "sold out" overlay.'}`;
       
+      console.log('🖼️ Generating social post image via voice command for:', menuName);
       const imageData = await GenAIService.generateImage(imagePrompt, getNewToken);
       
       // Store results for UI display
@@ -365,17 +377,17 @@ export function useVoiceCommands(getNewToken: () => Promise<{ name: string }>) {
       });
       
       if (imageData) {
-        console.log('Social post image generated for:', menuName);
+        console.log('✅ Social post image generated for:', menuName);
         // You can extend this to:
         // - Send image to backend via REST API
         // - Post to social media
         // - Save locally
         // - Display in UI
       } else {
-        console.log('No image generated for social post');
+        console.log('❌ No image generated for social post');
       }
     } catch (err) {
-      console.error('Failed to generate social post image:', err);
+      console.error('❌ Failed to generate social post image:', err);
       // Store error for UI display
       setVoiceSocialPostResult({
         imageData: null,
@@ -384,6 +396,8 @@ export function useVoiceCommands(getNewToken: () => Promise<{ name: string }>) {
         timestamp: Date.now(),
         error: err instanceof Error ? err.message : 'Unknown error occurred'
       });
+    } finally {
+      setIsGeneratingSocialPost(false);
     }
   }, [getNewToken]);
 
@@ -489,6 +503,7 @@ export function useVoiceCommands(getNewToken: () => Promise<{ name: string }>) {
     lastCommand,
     error,
     voiceSocialPostResult,
+    isGeneratingSocialPost,
   };
 } 
 

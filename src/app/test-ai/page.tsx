@@ -15,7 +15,7 @@ const getNewToken = async () => {
 // Test component that uses the AI context
 function AITestComponent() {
   const { voice, webSocket, prediction, isInitialized } = useAIEngine();
-  const { startListening, stopListening, isListening, isProcessing, transcript, lastCommand, error, voiceSocialPostResult } = useVoiceCommands();
+  const { startListening, stopListening, isListening, isProcessing, transcript, lastCommand, error, voiceSocialPostResult, isGeneratingSocialPost } = useVoiceCommands();
 
   const [predictionResult, setPredictionResult] = useState<PredictionData[] | null>(null);
   const [predictionLoading, setPredictionLoading] = useState(false);
@@ -228,35 +228,64 @@ function AITestComponent() {
             </div>
           )}
 
-          {voiceSocialPostResult && (
+          {(voiceSocialPostResult || isGeneratingSocialPost) && (
             <div className="bg-green-50 p-4 rounded border border-green-200">
-              <h3 className="font-medium mb-2 text-green-800">Voice Social Post Result:</h3>
-              <div className="space-y-4">
-                <div className="text-sm text-green-700">
-                  <p><strong>Menu:</strong> {voiceSocialPostResult.menuName}</p>
-                  <p><strong>Status:</strong> {voiceSocialPostResult.status}</p>
-                  <p><strong>Generated:</strong> {new Date(voiceSocialPostResult.timestamp).toLocaleString()}</p>
-                </div>
-                
-                {voiceSocialPostResult.error ? (
-                  <div className="bg-red-100 border border-red-300 rounded p-3">
-                    <p className="text-red-700 text-sm"><strong>Error:</strong> {voiceSocialPostResult.error}</p>
-                  </div>
-                ) : voiceSocialPostResult.imageData ? (
-                  <div className="space-y-2">
-                    <img 
-                      src={`data:image/png;base64,${voiceSocialPostResult.imageData}`}
-                      alt={`Generated image of ${voiceSocialPostResult.menuName}`}
-                      className="max-w-sm h-auto rounded-lg shadow-md border"
-                    />
-                    <p className="text-xs text-green-600">
-                      Image size: {Math.round(voiceSocialPostResult.imageData.length * 0.75 / 1024)} KB
-                    </p>
-                  </div>
-                ) : (
-                  <p className="text-yellow-700 text-sm">Image generation in progress...</p>
+              <h3 className="font-medium mb-2 text-green-800">
+                Voice Social Post Result:
+                {isGeneratingSocialPost && (
+                  <span className="ml-2 inline-flex items-center">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600"></div>
+                    <span className="ml-2 text-sm font-normal">Generating...</span>
+                  </span>
                 )}
-              </div>
+              </h3>
+              
+              {voiceSocialPostResult && (
+                <div className="space-y-4">
+                  <div className="text-sm text-green-700">
+                    <p><strong>Menu:</strong> {voiceSocialPostResult.menuName}</p>
+                    <p><strong>Status:</strong> {voiceSocialPostResult.status}</p>
+                    <p><strong>Generated:</strong> {new Date(voiceSocialPostResult.timestamp).toLocaleString()}</p>
+                  </div>
+                  
+                  {voiceSocialPostResult.error ? (
+                    <div className="bg-red-100 border border-red-300 rounded p-3">
+                      <p className="text-red-700 text-sm"><strong>Error:</strong> {voiceSocialPostResult.error}</p>
+                    </div>
+                  ) : voiceSocialPostResult.imageData ? (
+                    <div className="space-y-2">
+                      <img 
+                        src={`data:image/png;base64,${voiceSocialPostResult.imageData}`}
+                        alt={`Generated image of ${voiceSocialPostResult.menuName}`}
+                        className="max-w-sm h-auto rounded-lg shadow-md border"
+                      />
+                      <p className="text-xs text-green-600">
+                        Image size: {Math.round(voiceSocialPostResult.imageData.length * 0.75 / 1024)} KB
+                      </p>
+                    </div>
+                  ) : isGeneratingSocialPost ? (
+                    <div className="flex items-center space-x-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                      <div className="text-blue-700">
+                        <p className="font-medium">Sedang membuat gambar...</p>
+                        <p className="text-sm">Harap tunggu, AI sedang menghasilkan gambar makanan yang menarik</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-yellow-700 text-sm">Waiting for image generation to complete...</p>
+                  )}
+                </div>
+              )}
+              
+              {isGeneratingSocialPost && !voiceSocialPostResult && (
+                <div className="flex items-center space-x-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                  <div className="text-blue-700">
+                    <p className="font-medium">Memulai pembuatan gambar...</p>
+                    <p className="text-sm">AI sedang memproses permintaan voice command Anda</p>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -270,8 +299,8 @@ function AITestComponent() {
           <ul className="list-disc list-inside space-y-1 text-gray-700">
             <li><strong>Stock Management:</strong> "tambah stok ayam goreng 20 potong"</li>
             <li><strong>Sales Recording:</strong> "catat pesanan 2 nasi telur sama 1 es teh"</li>
-            <li><strong>Menu Announcement:</strong> "umumkan rendang sudah siap"</li>
-            <li><strong>Sold Out:</strong> "perkedel habis"</li>
+            <li><strong>Menu Announcement:</strong> "umumkan rendang sudah siap" <em>(generates image!)</em></li>
+            <li><strong>Sold Out:</strong> "perkedel habis" <em>(generates image!)</em></li>
             <li><strong>Daily Report:</strong> "buat laporan harian"</li>
             <li><strong>Predictions:</strong> "prediksi stok besok" <em>(if voice command supports PREDICTION action)</em></li>
           </ul>
@@ -367,32 +396,48 @@ function AITestComponent() {
             </div>
           </div>
 
-          <button
-            onClick={handleGenerateSocialPost}
-            disabled={socialPostLoading || !isInitialized || !menuName}
-            className="px-6 py-2 bg-orange-500 text-white rounded disabled:bg-gray-400 disabled:cursor-not-allowed"
-          >
-            {socialPostLoading ? 'Generating Image...' : 'Generate Social Post Image'}
-          </button>
-        </div>
+                  <button
+          onClick={handleGenerateSocialPost}
+          disabled={socialPostLoading || !isInitialized || !menuName}
+          className="px-6 py-2 bg-orange-500 text-white rounded disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center space-x-2"
+        >
+          {socialPostLoading && (
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+          )}
+          <span>{socialPostLoading ? 'Generating Image...' : 'Generate Social Post Image'}</span>
+        </button>
+      </div>
 
-        {socialPostResult && (
-          <div className="mt-4 bg-gray-50 p-4 rounded border">
-            <h3 className="font-medium mb-2">Generated Social Post Image:</h3>
-            <div className="space-y-4">
-              <img 
-                src={`data:image/png;base64,${socialPostResult}`}
-                alt={`Generated image of ${menuName}`}
-                className="max-w-full h-auto rounded-lg shadow-lg"
-              />
-              <div className="text-xs text-gray-600">
-                <p><strong>Menu:</strong> {menuName}</p>
-                <p><strong>Status:</strong> {menuStatus === 'ready' ? 'Ready to serve' : 'Sold out'}</p>
-                <p><strong>Image Size:</strong> {Math.round(socialPostResult.length * 0.75 / 1024)} KB (base64)</p>
-              </div>
+      {socialPostLoading && (
+        <div className="mt-4 bg-blue-50 p-4 rounded border border-blue-200">
+          <div className="flex items-center space-x-3">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+            <div className="text-blue-700">
+              <p className="font-medium">Sedang membuat gambar "{menuName}"</p>
+              <p className="text-sm">Status: {menuStatus === 'ready' ? 'Siap disajikan' : 'Sold out'}</p>
+              <p className="text-xs text-blue-600">Proses ini mungkin memakan waktu 10-30 detik...</p>
             </div>
           </div>
-        )}
+        </div>
+      )}
+
+      {socialPostResult && (
+        <div className="mt-4 bg-gray-50 p-4 rounded border">
+          <h3 className="font-medium mb-2">Generated Social Post Image:</h3>
+          <div className="space-y-4">
+            <img 
+              src={`data:image/png;base64,${socialPostResult}`}
+              alt={`Generated image of ${menuName}`}
+              className="max-w-full h-auto rounded-lg shadow-lg"
+            />
+            <div className="text-xs text-gray-600">
+              <p><strong>Menu:</strong> {menuName}</p>
+              <p><strong>Status:</strong> {menuStatus === 'ready' ? 'Ready to serve' : 'Sold out'}</p>
+              <p><strong>Image Size:</strong> {Math.round(socialPostResult.length * 0.75 / 1024)} KB (base64)</p>
+            </div>
+          </div>
+        </div>
+      )}
 
         {socialPostError && (
           <div className="mt-4 bg-red-50 border border-red-200 rounded-lg p-4">

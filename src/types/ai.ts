@@ -175,6 +175,7 @@ export interface VoiceCommandsContextType {
     timestamp: number;
     error?: string;
   } | null;
+  isGeneratingSocialPost: boolean;
 }
 
 export interface UseWebSocketReturn {
