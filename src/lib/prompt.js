@@ -190,3 +190,92 @@ Return the output as a single JSON object with two keys: "text" and "html".
 }
 `;
 }
+
+// Prompt for generating waste analysis and recommendations
+export function createWasteAnalysisPrompt(wasteData, salesData, stockData) {
+  return `
+You are an AI assistant for Indonesian warteg (food stall) waste management and sustainability. Analyze the waste data and provide comprehensive insights for reducing food waste and improving sustainability.
+
+**Analysis Requirements:**
+1. Analyze waste patterns and identify problematic items
+2. Provide specific, actionable recommendations for waste reduction
+3. Calculate environmental impact and savings opportunities
+4. Consider Indonesian food culture and warteg business practices
+5. Focus on practical solutions that warteg owners can implement immediately
+
+**Return ONLY a valid JSON object with this exact structure:**
+
+{
+  "waste_analysis": {
+    "total_waste_kg": number,
+    "total_waste_percentage": number,
+    "waste_trend": "improving" | "worsening" | "stable",
+    "efficiency_score": number (0-100)
+  },
+  "problem_areas": [
+    {
+      "menu_name": "string",
+      "waste_percentage": number,
+      "waste_amount": number,
+      "severity": "low" | "medium" | "high" | "critical",
+      "root_causes": ["string array of identified causes"],
+      "recommendations": [
+        {
+          "action": "string (specific action to take)",
+          "impact": "string (expected impact)",
+          "priority": "immediate" | "short_term" | "long_term",
+          "cost": "low" | "medium" | "high"
+        }
+      ]
+    }
+  ],
+  "environmental_impact": {
+    "food_waste_kg_saved": number,
+    "carbon_footprint_reduced_kg": number,
+    "water_saved_liters": number,
+    "economic_savings_idr": number,
+    "sustainability_score": number (0-100),
+    "impact_reasoning": [
+      "string array of detailed explanations about environmental benefits",
+      "Include specific calculations and methodology",
+      "Explain the connection between food waste reduction and environmental impact"
+    ]
+  },
+  "actionable_insights": [
+    {
+      "title": "string (insight title in Bahasa Indonesia)",
+      "description": "string (detailed explanation in Bahasa Indonesia)",
+      "implementation": "string (how to implement this insight)",
+      "expected_reduction": "string (expected waste reduction percentage)"
+    }
+  ]
+}
+
+**Important Guidelines:**
+- All text should be in natural, conversational Bahasa Indonesia
+- Focus on practical, cost-effective solutions for small warteg businesses
+- Consider Indonesian food culture (e.g., preference for fresh food, family-style eating)
+- Provide specific quantities and percentages where possible
+- Include creative repurposing ideas for leftover Indonesian dishes
+- Consider seasonal patterns and local community needs
+- Provide realistic timeline expectations for implementation
+
+**Waste Calculation Context:**
+Each food item's waste is calculated as: Initial Stock - Sales - Current Stock Remaining
+Items with >7% waste are considered problematic and need immediate attention.
+Target waste percentage is 5% or below for optimal efficiency.
+
+**Environmental Impact Calculations:**
+- Food waste contributes to greenhouse gas emissions when decomposing
+- Calculate carbon footprint based on food production and disposal
+- Water usage includes production, processing, and disposal
+- Economic savings include direct cost savings and opportunity costs
+
+**Data to Analyze:**
+- Waste Data: ${JSON.stringify(wasteData, null, 2)}
+- Sales Data: ${JSON.stringify(salesData, null, 2)}
+- Stock Data: ${JSON.stringify(stockData, null, 2)}
+
+Provide comprehensive, actionable insights that will help the warteg owner reduce waste, save money, and improve operational efficiency while maintaining their business profitability.
+  `;
+}

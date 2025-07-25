@@ -14,7 +14,8 @@ import { GoogleGenAI, Modality } from "@google/genai";
 import {
   createCommandParserPrompt,
   createPredictionPrompt,
-  createDailyReportPrompt
+  createDailyReportPrompt,
+  createWasteAnalysisPrompt
 } from '@/lib/prompt';
 import * as api from '@/lib/api';
 
@@ -130,6 +131,27 @@ export class GenAIService {
     ]);
 
     const prompt = createDailyReportPrompt(dailySales, dailyStock);
+    const responseText = await this.getLiveResponse(prompt, getNewToken);
+
+    const jsonString = responseText.replace(/```json|```/g, '').trim();
+    return JSON.parse(jsonString);
+  }
+
+  /**
+   * Generates waste analysis and sustainability recommendations using the AI model.
+   * @param wasteData Array of waste data for each menu item.
+   * @param salesData Sales data from the API.
+   * @param stockData Stock data from the API.
+   * @param getNewToken A function to get a fresh authentication token.
+   * @returns A promise that resolves to the waste analysis data.
+   */
+  static async getWasteAnalysis(
+    wasteData: any[], 
+    salesData: any, 
+    stockData: any, 
+    getNewToken: () => Promise<{ name: string }>
+  ): Promise<any> {
+    const prompt = createWasteAnalysisPrompt(wasteData, salesData, stockData);
     const responseText = await this.getLiveResponse(prompt, getNewToken);
 
     const jsonString = responseText.replace(/```json|```/g, '').trim();
