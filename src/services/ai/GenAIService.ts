@@ -20,6 +20,7 @@ import * as api from '@/lib/api';
 
 // Recommended to use the latest models for live and batch processing
 const LIVE_MODEL_NAME = 'gemini-2.0-flash-live-001';
+const IMAGE_MODEL_NAME = 'gemini-2.0-flash-preview-image-generation';
 
 export class GenAIService {
   /**
@@ -68,7 +69,7 @@ export class GenAIService {
           },
         });
 
-        console.log('ℹ️ Sending prompt to live session:', prompt);
+        console.log('ℹ️ Sending prompt to live session:', prompt.slice(0, 100));
         session.sendRealtimeInput({ text: prompt });
       } catch (e) {
         reject(e);
@@ -92,9 +93,9 @@ export class GenAIService {
 
     const menu_list = await api.menuAPI.getMenu();
 
-    console.log("Menu_list", menu_list.data);
+    console.log("Menu_list", (menu_list as any).data);
 
-    const prompt = createCommandParserPrompt(transcript, menu_list.data.menu.length >= 1 || dummy_menu);
+    const prompt = createCommandParserPrompt(transcript, ((menu_list as any).data as any)?.menu?.length >= 1 ? ((menu_list as any).data as any).menu : dummy_menu);
     const responseText = await this.getLiveResponse(prompt, getNewToken);
 
     // Clean up the response to get a valid JSON string
@@ -133,5 +134,45 @@ export class GenAIService {
 
     const jsonString = responseText.replace(/```json|```/g, '').trim();
     return JSON.parse(jsonString);
+  }
+
+  /**
+   * Generates an image based on the provided prompt using the image generation model.
+   * @param prompt The prompt for image generation.
+   * @param getNewToken A function to get a fresh authentication token.
+   * @returns A promise that resolves to the generated image data as base64 string.
+   */
+  static async generateImage(prompt: string, getNewToken: () => Promise<{ name: string }>): Promise<string | null> {
+    // const freshToken = await getNewToken();
+    // if (!freshToken?.name) {
+    //   throw new Error("Could not get a valid token for image generation.");
+    // }
+
+    const genAI = new GoogleGenAI({ apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY });
+
+    try {
+      const response = await genAI.models.generateContent({
+        model: IMAGE_MODEL_NAME,
+        contents: prompt,
+        config: {
+          responseModalities: [Modality.TEXT, Modality.IMAGE],
+        },
+      });
+
+      // Extract image data from response
+      const parts = response.candidates?.[0]?.content?.parts;
+      if (parts) {
+        for (const part of parts) {
+          if (part.inlineData?.data) {
+            return part.inlineData.data; // Return base64 image data
+          }
+        }
+      }
+
+      return null; // No image generated
+    } catch (error) {
+      console.error('Image generation failed:', error);
+      throw error;
+    }
   }
 } 

@@ -286,6 +286,16 @@ export function useVoiceCommands(getNewToken: () => Promise<{ name: string }>) {
   const [transcript, setTranscript] = useState("");
   const [finalTranscript, setFinalTranscript] = useState("");
   const recognitionRef = useRef<any>(null);
+  
+  // Social post results from voice commands
+  const [voiceSocialPostResult, setVoiceSocialPostResult] = useState<{
+    imageData: string | null;
+    menuName: string;
+    status: string;
+    timestamp: number;
+    error?: string;
+  } | null>(null);
+  const [isGeneratingSocialPost, setIsGeneratingSocialPost] = useState(false);
 
   useEffect(() => {
     const init = async () => {
@@ -335,6 +345,62 @@ export function useVoiceCommands(getNewToken: () => Promise<{ name: string }>) {
     }
   }, [getNewToken]);
 
+  // Generate social post with image
+  const generateSocialPost = useCallback(async (payload: any) => {
+    setIsGeneratingSocialPost(true);
+    
+    try {
+      const menuName = payload.name;
+      const status = payload.status; // 'ready' or 'sold_out'
+      
+      // Set initial loading state
+      setVoiceSocialPostResult({
+        imageData: null,
+        menuName,
+        status,
+        timestamp: Date.now()
+      });
+      
+      // Create image prompt based on menu item and status
+      const imagePrompt = `Create an appetizing, professional food photography image of ${menuName}, a delicious Indonesian dish. The image should be bright, colorful, and make the food look irresistible. ${status === 'ready' ? 'Show it as freshly prepared and ready to eat. With text saying "READY TO SERVE!"' : 'Show it with a subtle "sold out" overlay.'}`;
+      
+      console.log('🖼️ Generating social post image via voice command for:', menuName);
+      const imageData = await GenAIService.generateImage(imagePrompt, getNewToken);
+      
+      // Store results for UI display
+      setVoiceSocialPostResult({
+        imageData,
+        menuName,
+        status,
+        timestamp: Date.now(),
+        error: imageData ? undefined : 'No image generated'
+      });
+      
+      if (imageData) {
+        console.log('✅ Social post image generated for:', menuName);
+        // You can extend this to:
+        // - Send image to backend via REST API
+        // - Post to social media
+        // - Save locally
+        // - Display in UI
+      } else {
+        console.log('❌ No image generated for social post');
+      }
+    } catch (err) {
+      console.error('❌ Failed to generate social post image:', err);
+      // Store error for UI display
+      setVoiceSocialPostResult({
+        imageData: null,
+        menuName: payload.name || 'Unknown',
+        status: payload.status || 'unknown',
+        timestamp: Date.now(),
+        error: err instanceof Error ? err.message : 'Unknown error occurred'
+      });
+    } finally {
+      setIsGeneratingSocialPost(false);
+    }
+  }, [getNewToken]);
+
   const processCommand = useCallback(async (commandText: string) => {
     if (!commandText) return;
 
@@ -366,6 +432,7 @@ export function useVoiceCommands(getNewToken: () => Promise<{ name: string }>) {
           break;
         case 'SOCIAL_POST':
           feedbackMessage = `Oke, saya akan umumkan bahwa ${command.payload.name} sekarang ${command.payload.status === 'ready' ? 'siap' : 'habis'}.`;
+          generateSocialPost(command.payload);
           break;
         case 'INVALID_MENU':
           feedbackMessage = "Maaf, sepertinya ada kesalahan nama menu.";
@@ -435,6 +502,8 @@ export function useVoiceCommands(getNewToken: () => Promise<{ name: string }>) {
     transcript: finalTranscript || transcript,
     lastCommand,
     error,
+    voiceSocialPostResult,
+    isGeneratingSocialPost,
   };
 } 
 
