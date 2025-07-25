@@ -53,6 +53,54 @@ export function useSmartegAI({ getNewToken }) {
         }
     }, []);
 
+    const getLiveResponse = useCallback(async (prompt) => {
+      const freshToken = await getNewToken();
+      if (!freshToken?.name) {
+        throw new Error("Could not get a valid token for processing.");
+      }
+
+      const genAI = new GoogleGenAI({ apiKey: freshToken.name, httpOptions: { apiVersion: 'v1alpha' } });
+
+      return new Promise(async (resolve, reject) => {
+        let accumulatedText = '';
+        try {
+          const session = await genAI.live.connect({
+            model: LIVE_MODEL_NAME,
+            config: {
+              responseModalities: [Modality.TEXT],
+            },
+            callbacks: {
+              onopen: () => {
+                console.log('Live session opened.');
+              },
+              onmessage: (message) => {
+                if (message.text) {
+                  accumulatedText += message.text;
+                }
+                if (message.serverContent?.turnComplete) {
+                  console.log('Live session turn complete.');
+                  session.close();
+                  resolve(accumulatedText);
+                }
+              },
+              onerror: (e) => {
+                console.error('Live session error:', e);
+                reject(e);
+              },
+              onclose: () => {
+                console.log('Live session closed.');
+              },
+            },
+          });
+
+          session.sendRealtimeInput({ text: prompt });
+
+        } catch (e) {
+          reject(e);
+        }
+      });
+    }, [getNewToken]);
+
     const processFinalTranscript = useCallback(async (finalTranscript) => {
         if (!finalTranscript.trim()) return;
         setIsProcessing(true);
@@ -60,59 +108,10 @@ export function useSmartegAI({ getNewToken }) {
         let feedbackMessage = "Maaf, terjadi kesalahan.";
 
         try {
-            const freshToken = await getNewToken();
-            if (!freshToken?.name) throw new Error("Could not get a valid token for processing.");
-            
-            const genAI = new GoogleGenAI({ apiKey: freshToken.name, httpOptions: { apiVersion: 'v1alpha' } });
-            const prompt = createCommandParserPrompt(finalTranscript);
-
-            // This function wraps the live session in a Promise
-            const getLiveResponse = () => new Promise(async (resolve, reject) => {
-                let accumulatedText = '';
-                
-                try {
-                    const session = await genAI.live.connect({
-                        model: LIVE_MODEL_NAME,
-                        config: {
-                            responseModalities: [Modality.TEXT],
-                        },
-                        callbacks: {
-                            onopen: () => {
-                                console.log('Live session opened.');
-                                // Don't send input here - session object isn't available yet
-                            },
-                            onmessage: (message) => {
-                                // Accumulate text from streamed messages
-                                if (message.text) {
-                                    accumulatedText += message.text;
-                                }
-                                // When the turn is complete, resolve the promise
-                                if (message.serverContent?.turnComplete) {
-                                    console.log('Live session turn complete.');
-                                    session.close();
-                                    resolve(accumulatedText);
-                                }
-                            },
-                            onerror: (e) => {
-                                console.error('Live session error:', e);
-                                reject(e);
-                            },
-                            onclose: () => {
-                                console.log('Live session closed.');
-                            },
-                        },
-                    });
-                    
-                    // Now the session is established, send the input
-                    console.log("Prompt to send: ", prompt);
-                    session.sendRealtimeInput({ text: prompt });
-                    
-                } catch (e) {
-                    reject(e);
-                }
-            });
-
-            const responseText = await getLiveResponse();
+            // TODO: CALL ACTUAL BACKEND ENDPOINT TO GET AVAILABLE MENUS
+            const dummy_menu = [{"name": "ayam goreng", "price":18000}, {"name": "rendang", "price":25000}]
+            const prompt = createCommandParserPrompt(finalTranscript, dummy_menu);
+            const responseText = await getLiveResponse(prompt);
             
             const jsonString = responseText.replace(/```json|```/g, '').trim();
             const command = JSON.parse(jsonString);
@@ -121,13 +120,18 @@ export function useSmartegAI({ getNewToken }) {
 
             switch (command.action) {
                 case 'UPDATE_STOCK':
+                    // TODO: REAL USE CASE WOULD UPDATE UI NOT DIRECTLY CALL BACKEND
                     await api.updateStock(command.payload);
-                    feedbackMessage = `Oke, stok ${command.payload.itemName} sudah diperbarui.`;
+                    const stockNames = command.payload.map(item => item.name).join(', ');
+                    feedbackMessage = `Oke, stok ${stockNames} sudah diperbarui.`;
                     break;
                 case 'RECORD_SALE':
                     await api.recordSale(command.payload);
-                    const itemNames = command.payload.items.map(i => `${i.quantity} ${i.itemName}`).join(', ');
+                    const itemNames = command.payload.map(i => `${i.counts} ${i.name}`).join(', ');
                     feedbackMessage = `Sip, pesanan ${itemNames} sudah dicatat.`;
+                    break;
+                case 'INVALID_MENU':
+                    feedbackMessage = "Maaf, sepertinya ada kesalahan nama menu";
                     break;
                 default:
                     feedbackMessage = "Maaf, saya tidak mengerti maksud Anda.";
@@ -140,7 +144,7 @@ export function useSmartegAI({ getNewToken }) {
             speak(feedbackMessage);
             setIsProcessing(false);
         }
-    }, [getNewToken, speak]);
+    }, [getNewToken, speak, getLiveResponse]);
 
     const startInteraction = useCallback(() => {
         const SpeechRecognition = getSpeechRecognition();
@@ -223,18 +227,10 @@ export function useSmartegAI({ getNewToken }) {
         setIsProcessing(true);
         setError(null);
         try {
-            const freshToken = await getNewToken();
-            if (!freshToken?.name) throw new Error("Could not get a valid token for processing.");
-
-            // This function uses the standard non-streaming API which is correct for this task
-            const genAI = new GoogleGenAI({ apiKey: freshToken.name, httpOptions: { apiVersion: 'v1alpha' } });
-            const model = genAI.getGenerativeModel({ model: BATCH_MODEL_NAME });
-
             const historicalData = await api.getHistoricalData();
+            console.log("Historical Data", historicalData);
             const prompt = createPredictionPrompt(historicalData);
-            const result = await model.generateContent(prompt);
-            const response = await result.response;
-            const responseText = response.text();
+            const responseText = await getLiveResponse(prompt);
 
             const jsonString = responseText.replace(/```json|```/g, '').trim();
             return JSON.parse(jsonString);

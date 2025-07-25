@@ -11,6 +11,7 @@ export function createPredictionPrompt(historicalData) {
   return `
 Predict optimal quantities for tomorrow based on this warteg sales data. Return JSON only:
 {"ayam goreng": 25, "tempe orek": 40}
+replace "ayam goreng" and "tempe orek" in accordance with the menus available in the data.
 
 Historical Data:
 ${JSON.stringify(historicalData, null, 2)}
@@ -18,20 +19,28 @@ ${JSON.stringify(historicalData, null, 2)}
 }
 
 // Prompt for the text model to parse commands
-export function createCommandParserPrompt(transcript) {
+export function createCommandParserPrompt(transcript, menu_list) {
     return `
 Parse this Bahasa Indonesia transcript into JSON with "action" and "payload" keys only:
 
 Actions:
-- UPDATE_STOCK: {"itemName": string, "quantity": number, "unit": string}
-- RECORD_SALE: {"items": [{"itemName": string, "quantity": number}], "totalPrice"?: number}
-- SOCIAL_POST: {"itemName": string, "status": "ready"|"sold_out"}
+- UPDATE_STOCK: [{"name": string, "counts": number, "price": integer}, ... ]
+- RECORD_SALE: [{"name": string, "counts": number}], "totalPrice"?: number}
+- SOCIAL_POST: {"name": string, "status": "ready"|"sold_out"}
+- INVALID_MENU
 - UNKNOWN: {"originalTranscript": string}
 
 Examples:
-"tambah stok ayam 20 potong" → {"action": "UPDATE_STOCK", "payload": {"itemName": "ayam goreng", "quantity": 20, "unit": "potong"}}
-"catat pesanan 2 nasi telur" → {"action": "RECORD_SALE", "payload": {"items": [{"itemName": "nasi telur", "quantity": 2}]}}
-"rendang siap" → {"action": "SOCIAL_POST", "payload": {"itemName": "rendang", "status": "ready"}}
+"tambah stok ayam 20 potong" → {"action": "UPDATE_STOCK", "payload": [{"name": "ayam goreng", "counts": 20, "price": 18000}]}
+"catat pesanan 2 nasi telur" → {"action": "RECORD_SALE", "payload": [{"name": "nasi telur", "counts": 2}]}
+"rendang siap" → {"action": "SOCIAL_POST", "payload": {"name": "rendang", "status": "ready"}}
+
+For update stock, check the prices from this JSON: ${JSON.stringify(menu_list, null, 2)}
+
+Make sure the menu names are valid in this dataset: ${JSON.stringify(menu_list, null, 2)}, if there are invalid names
+then return the invalid_menu action and null payload.
+
+Any other input that you think doesn't fall into the defined actions default to UNKNOWN
 
 Transcript: "${transcript}"
     `;
