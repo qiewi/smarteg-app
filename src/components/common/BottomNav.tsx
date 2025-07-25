@@ -1,12 +1,23 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { Home, Mic, User } from "lucide-react";
+import { Home, Mic, User, X } from "lucide-react";
 import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 
 const BottomNav = () => {
   const pathname = usePathname();
   const router = useRouter();
+  const [isRecording, setIsRecording] = useState(false);
+
+  // Check if currently on voice page to determine recording state
+  useEffect(() => {
+    if (pathname === "/voice") {
+      setIsRecording(true);
+    } else {
+      setIsRecording(false);
+    }
+  }, [pathname]);
 
   const navItems = [
     {
@@ -28,8 +39,15 @@ const BottomNav = () => {
   };
 
   const handleRecord = () => {
-    // Handle recording functionality
-    console.log("Start recording...");
+    if (isRecording) {
+      // If currently recording, go back to home (this will stop recording in voice page)
+      console.log("Stop recording...");
+      router.push("/home");
+    } else {
+      // Start recording by navigating to voice page with autoStart
+      console.log("Start recording...");
+      router.push("/voice?autoStart=true");
+    }
   };
 
   return (
@@ -42,11 +60,11 @@ const BottomNav = () => {
         {/* Beranda */}
         <button
           onClick={() => handleNavigation(navItems[0].href)}
-                     className={`flex flex-col items-center py-2 px-4 rounded-lg transition-colors ${
-             navItems[0].isActive 
-               ? "text-primary" 
-               : "text-gray-500 hover:text-primary"
-           }`}
+          className={`flex flex-col items-center py-2 px-4 rounded-lg transition-colors ${
+            navItems[0].isActive 
+              ? "text-primary" 
+              : "text-gray-500 hover:text-primary"
+          }`}
         >
           <Home 
             size={24} 
@@ -60,29 +78,40 @@ const BottomNav = () => {
           <motion.button
             onClick={handleRecord}
             className="absolute -top-12 left-1/2 transform -translate-x-1/2"
+            transition={{ type: "spring", stiffness: 400, damping: 17 }}
           >
             {/* Gradient Background Circle */}
-                         <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-xl">
+            <div className={`w-16 h-16 rounded-full flex items-center justify-center shadow-xl transition-all duration-300 ${
+              isRecording 
+                ? "bg-gradient-to-br from-red-500 to-red-600" 
+                : "bg-gradient-to-br from-primary to-accent"
+            }`}>
               {/* Inner Circle */}
               <div className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                <Mic size={28} className="text-white" />
+                {isRecording ? (
+                  <X size={28} className="text-white" />
+                ) : (
+                  <Mic size={28} className="text-white" />
+                )}
               </div>
             </div>
           </motion.button>
           {/* Label positioned to align with other nav labels */}
-          <span className="text-xs font-medium text-gray-600 mt-8">
-            Catat
+          <span className={`text-xs font-medium mt-8 transition-colors ${
+            isRecording ? "text-red-500" : "text-gray-600"
+          }`}>
+            {isRecording ? "Tutup" : "Catat"}
           </span>
         </div>
 
         {/* Profile */}
         <button
           onClick={() => handleNavigation(navItems[1].href)}
-                     className={`flex flex-col items-center py-2 px-4 rounded-lg transition-colors ${
-             navItems[1].isActive 
-               ? "text-primary" 
-               : "text-gray-500 hover:text-primary"
-           }`}
+          className={`flex flex-col items-center py-2 px-4 rounded-lg transition-colors ${
+            navItems[1].isActive 
+              ? "text-primary" 
+              : "text-gray-500 hover:text-primary"
+          }`}
         >
           <User 
             size={24} 
