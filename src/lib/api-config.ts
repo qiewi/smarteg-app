@@ -23,6 +23,10 @@ export const API_CONFIG = {
     MENU_CREATE: '/service/menu/create',
     MENU_UPDATE: '/service/menu/update',
     MENU_REMOVE: '/service/menu/remove',
+
+    // User Management endpoints
+    USER_READ: '/user/me',
+    USER_UPDATE: '/user/me',
     
     // Stock Management endpoints
     STOCK_DAILY: '/service/stock/daily',

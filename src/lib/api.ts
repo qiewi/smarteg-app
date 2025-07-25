@@ -164,6 +164,16 @@ export const menuAPI = {
     apiClient.delete(`/menu/${id}`),
 }; 
 
+export const userAPI = {
+  // Get user profile
+  getUserProfile: () =>
+    apiClient.get(API_CONFIG.ENDPOINTS.USER_READ),
+
+  // Update user profile
+  updateUserProfile: (userData: any) =>
+    apiClient.put(API_CONFIG.ENDPOINTS.USER_UPDATE, userData),
+};
+
 export interface SalesData {
   sales: number;
   items: any[];
