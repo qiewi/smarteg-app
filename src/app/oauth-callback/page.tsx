@@ -98,9 +98,9 @@ function OAuthCallbackContent() {
         <CardContent className="space-y-6">
           {status === 'loading' && (
             <div className="space-y-3">
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-3/4" />
-              <Skeleton className="h-4 w-1/2" />
+              <Skeleton className="bg-primary-500 h-4 w-full" />
+              <Skeleton className="bg-primary-400 h-4 w-3/4" />
+              <Skeleton className="bg-primary-300 h-4 w-1/2" />
             </div>
           )}
           
@@ -108,37 +108,19 @@ function OAuthCallbackContent() {
             <div className="text-center space-y-4">
               <div className="text-6xl">✅</div>
               <p className="text-sm text-gray-600">
-                Anda akan dialihkan ke dashboard dalam beberapa detik...
+                Login Berhasil
               </p>
-              <Button onClick={handleManualRedirect} className="w-full">
-                Lanjut ke Dashboard
-              </Button>
             </div>
           )}
           
           {status === 'error' && (
-            <div className="text-center space-y-4">
+            <div className="text-center space-y-8">
               <div className="text-6xl">❌</div>
-              <p className="text-sm text-red-600 bg-red-50 p-3 rounded">
-                {message}
-              </p>
-              <Button onClick={handleRetry} className="w-full">
+              <Button onClick={handleRetry} className="w-full text-white">
                 Coba Login Lagi
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={handleManualRedirect} 
-                className="w-full"
-              >
-                Lanjut ke Dashboard (Demo)
               </Button>
             </div>
           )}
-          
-          <div className="text-center text-xs text-gray-500 border-t pt-4">
-            <p>OAuth implementation akan diselesaikan di Task 2</p>
-            <p>Halaman ini adalah placeholder untuk demonstrasi flow</p>
-          </div>
         </CardContent>
       </Card>
     </div>
