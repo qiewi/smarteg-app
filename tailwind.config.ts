@@ -10,6 +10,9 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
+        'argesta': ['Argesta Display', 'serif'],
+        'eb-garamond': ['EB Garamond', 'serif'],
+        'inter': ['Inter', 'sans-serif'],
         'instrument': ['Instrument Sans', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       colors: {
@@ -25,6 +28,19 @@ const config: Config = {
           700: "#00565A",
           800: "#003A3C",
           900: "#001D1E",
+        },
+        primer: {
+          DEFAULT: "#014B3E",
+          50: "#E6F2F0",
+          100: "#CCE5E1",
+          200: "#99CBC2",
+          300: "#66B1A4",
+          400: "#339785",
+          500: "#014B3E",
+          600: "#013C32",
+          700: "#012D25",
+          800: "#001E19",
+          900: "#000F0C",
         },
         secondary: {
           DEFAULT: "#009098",
@@ -51,6 +67,19 @@ const config: Config = {
           700: "#A8750B",
           800: "#704E08",
           900: "#382704",
+        },
+        accent: {
+          DEFAULT: "#FAB623",
+          50: "#FEF9E7",
+          100: "#FDF3CF",
+          200: "#FBE79F",
+          300: "#F9DB6F",
+          400: "#F7CF3F",
+          500: "#FAB623",
+          600: "#C8921C",
+          700: "#966D15",
+          800: "#64490E",
+          900: "#322407",
         },
       },
     },

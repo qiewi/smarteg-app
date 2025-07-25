@@ -1,7 +1,8 @@
 'use client'
 
+import Link from 'next/link'
+
 export default function Error({
-  error,
   reset,
 }: {
   error: Error & { digest?: string }
@@ -14,7 +15,7 @@ export default function Error({
           Terjadi Kesalahan
         </h1>
         <p className="text-gray-600 mb-6">
-          Maaf, terjadi kesalahan pada aplikasi SmartEG.
+          Maaf, terjadi kesalahan pada aplikasi Smarteg.
         </p>
         <div className="space-y-4">
           <button
@@ -23,12 +24,12 @@ export default function Error({
           >
             Coba Lagi
           </button>
-          <a 
+          <Link 
             href="/" 
             className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
           >
             Kembali ke Beranda
-          </a>
+          </Link>
         </div>
       </div>
     </div>

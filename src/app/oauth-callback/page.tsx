@@ -90,7 +90,7 @@ function OAuthCallbackContent() {
           </CardTitle>
           <CardDescription>
             {status === 'loading' && 'Sedang memvalidasi akun Google Anda'}
-            {status === 'success' && 'Selamat datang di SmartEG'}
+            {status === 'success' && 'Selamat datang di Smarteg'}
             {status === 'error' && 'Terjadi kesalahan saat login'}
           </CardDescription>
         </CardHeader>

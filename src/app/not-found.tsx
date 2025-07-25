@@ -1,3 +1,5 @@
+import Link from 'next/link'
+
 export default function NotFound() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -9,12 +11,12 @@ export default function NotFound() {
         <p className="text-gray-600 mb-8">
           Maaf, halaman yang Anda cari tidak dapat ditemukan.
         </p>
-        <a 
-          href="/" 
+        <Link
+          href="/"
           className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
         >
           Kembali ke Beranda
-        </a>
+        </Link>
       </div>
     </div>
   )
