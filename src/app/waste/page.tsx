@@ -1,8 +1,7 @@
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { TrendingDown, ArrowLeft, Trash2, Target, AlertTriangle, Leaf } from "lucide-react";
+import { TrendingDown, Trash2, Target, AlertTriangle, Leaf } from "lucide-react";
 import Link from "next/link";
 
 export default function WastePage() {
