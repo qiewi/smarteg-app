@@ -18,19 +18,6 @@ import * as api from '@/lib/api';
 const LIVE_MODEL_NAME = 'gemini-2.0-flash-live-001';
 
 export class GenAIService {
-  private static genAI: GoogleGenAI | null = null;
-
-  /**
-   * Initializes the GoogleGenAI instance with the provided API key.
-   * This must be called before any other method.
-   * @param apiKey The Google AI API key.
-   */
-  private static initialize(apiKey: string) {
-    if (!this.genAI) {
-      this.genAI = new GoogleGenAI({ apiKey, httpOptions: { apiVersion: 'v1alpha' } });
-    }
-  }
-
   /**
    * Establishes a live connection to the GenAI model and processes a prompt.
    * This is used for real-time interactions like command parsing.
@@ -43,12 +30,14 @@ export class GenAIService {
     if (!freshToken?.name) {
       throw new Error("Could not get a valid token for processing.");
     }
-    this.initialize(freshToken.name);
+    
+    // Create a new instance for each call with the fresh token
+    const genAI = new GoogleGenAI({ apiKey: freshToken.name, httpOptions: { apiVersion: 'v1alpha' } });
 
     return new Promise(async (resolve, reject) => {
       let accumulatedText = '';
       try {
-        const session = await this.genAI!.live.connect({
+        const session = await genAI.live.connect({
           model: LIVE_MODEL_NAME,
           config: {
             responseModalities: [Modality.TEXT],
@@ -60,19 +49,22 @@ export class GenAIService {
                 accumulatedText += message.text;
               }
               if (message.serverContent?.turnComplete) {
-                console.log('Live session turn complete.');
+                console.log('✅ Live session turn complete.');
                 session.close();
                 resolve(accumulatedText);
               }
             },
-            onerror: (e) => {
-              console.error('Live session error:', e);
+            onerror: (e: Event) => {
+              console.error('❌ Live session error event:', e);
               reject(e);
             },
-            onclose: () => console.log('Live session closed.'),
+            onclose: (closeEvent: CloseEvent) => {
+              console.log('ℹ️ Live session closed.', { code: closeEvent.code, reason: closeEvent.reason, wasClean: closeEvent.wasClean });
+            },
           },
         });
 
+        console.log('ℹ️ Sending prompt to live session:', prompt);
         session.sendRealtimeInput({ text: prompt });
       } catch (e) {
         reject(e);

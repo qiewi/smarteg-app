@@ -28,7 +28,7 @@ export class WebSocketService {
 
   constructor(config?: Partial<WebSocketConfig>) {
     this.config = {
-      url: 'wss://temporary-server.com/ws', // Placeholder URL
+      url: 'wss://temporary-server.com/ws', // Placeholder URL - replace with your actual WebSocket server
       reconnectInterval: 3000,
       maxReconnectAttempts: 5,
       heartbeatInterval: 30000,
@@ -43,6 +43,15 @@ export class WebSocketService {
     return new Promise((resolve, reject) => {
       try {
         const wsUrl = url || this.config.url;
+        
+        // Skip connection if using placeholder URL
+        if (wsUrl === 'wss://temporary-server.com/ws') {
+          console.warn('WebSocket: Using placeholder URL, skipping connection. Please configure a real WebSocket server URL.');
+          this.notifyStatusChange('disconnected');
+          reject(new Error('Placeholder WebSocket URL - connection skipped'));
+          return;
+        }
+        
         console.log(`Connecting to WebSocket: ${wsUrl}`);
         
         this.notifyStatusChange('connecting');
@@ -64,18 +73,19 @@ export class WebSocketService {
         };
 
         this.ws.onerror = (error: any) => {
-          console.error('WebSocket error:', error);
+          console.warn('WebSocket connection error (this is normal if no WebSocket server is configured):', error.type);
           this.notifyStatusChange('error');
           reject(new Error('WebSocket connection failed'));
         };
 
         this.ws.onclose = (event: any) => {
-          console.log('WebSocket connection closed:', event.code, event.reason);
+          console.log('WebSocket connection closed:', event.code);
           this.isConnected = false;
           this.stopHeartbeat();
           this.notifyStatusChange('disconnected');
           
-          if (!this.isReconnecting && this.reconnectAttempts < this.config.maxReconnectAttempts) {
+          // Don't attempt reconnection for placeholder URL
+          if (wsUrl !== 'wss://temporary-server.com/ws' && !this.isReconnecting && this.reconnectAttempts < this.config.maxReconnectAttempts) {
             this.attemptReconnect();
           }
         };
