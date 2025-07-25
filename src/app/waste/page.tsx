@@ -1,7 +1,7 @@
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { TrendingDown, Trash2, Target, AlertTriangle, Leaf } from "lucide-react";
+import { TrendingDown, Trash2, Target, AlertTriangle, Leaf, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 export default function WastePage() {
@@ -9,17 +9,13 @@ export default function WastePage() {
     <DashboardLayout>
       <div className="space-y-6">
         {/* Header Section */}
-        <section>
-          <div className="flex items-center space-x-4">
-            <Link href="/home" className="inline-flex items-center justify-center w-10 h-10 bg-gray-300/40 backdrop-blur-sm border border-gray-400/30 rounded-md text-white hover:bg-white/30 transition-colors">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </Link>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Tracking Sisa Makanan</h1>
-              <p className="text-gray-600">Optimasi sisa makanan</p>
-            </div>
+        <section className="flex items-center space-x-3">
+          <Link href="/home" className="p-2 -ml-2 rounded-lg border border-gray-200/60 bg-gray-50/30 backdrop-blur-sm hover:bg-gray-100/60 hover:border-gray-300/70 transition-all duration-200">
+            <ArrowLeft className="w-5 h-5 text-gray-600" />
+          </Link>
+          <div>
+            <h1 className="text-xl font-medium text-gray-900">Sisa Makanan</h1>
+            <p className="text-sm text-gray-500">Manajemen limbah makanan</p>
           </div>
         </section>
 
