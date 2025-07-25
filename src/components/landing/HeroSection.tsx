@@ -155,7 +155,7 @@ const HeroSection = () => {
               playsInline
                               className="w-full rounded-t-lg shadow-2xl"
             >
-              <source src="https://cdn.cargovision.app/video.mp4" type="video/mp4" />
+              <source src="https://cdn.smarteg.app/video.mp4" type="video/mp4" />
             </video>
           </div>
         </motion.div>
