@@ -35,7 +35,7 @@ export default function HomePage() {
 
           {/* Greeting */}
           <div className="relative z-10">
-            <p className="text-white/90 text-lg mb-2">Good Morning,</p>
+            <p className="text-white/90 text-2xl font-eb-garamond italic font-normal leading-tight">Good Morning,</p>
             <h1 className="text-3xl font-bold mb-1">Warteg {wartegName}</h1>
             <p className="text-white/80 text-sm">{todayDate}</p>
           </div>

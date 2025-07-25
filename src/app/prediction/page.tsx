@@ -39,7 +39,7 @@ export default function PredictionPage() {
   return (
     <DashboardLayout>
       <div className="space-y-8">
-        {/* Simple Header */}
+        {/* Header */}
         <section className="flex items-center space-x-3">
           <Link href="/home" className="p-2 -ml-2 rounded-lg border border-gray-200/60 bg-gray-50/30 backdrop-blur-sm hover:bg-gray-100/60 hover:border-gray-300/70 transition-all duration-200">
             <ArrowLeft className="w-5 h-5 text-gray-600" />
@@ -47,44 +47,25 @@ export default function PredictionPage() {
           <div>
             <h1 className="text-xl font-medium text-gray-900">Prediksi Besok</h1>
             <p className="text-sm text-gray-500">Berdasarkan data 30 hari terakhir</p>
-      <div className="space-y-6">
-        {/* Header Section */}
-        <section>
-          <div className="flex items-center space-x-4">
-            <Link href="/home" className="inline-flex items-center justify-center w-10 h-10 bg-gray-300/40 backdrop-blur-sm border border-gray-400/30 rounded-md text-white hover:bg-white/30 transition-colors">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </Link>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Prediksi Penjualan</h1>
-              <p className="text-gray-600">Penjualan besok</p>
-            </div>
           </div>
         </section>
 
         {/* Main Prediction - Natural LLM Style */}
         <section>
-          <Card className="border border-gray-200 shadow-sm">
-            <CardContent className="p-6">
-              <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <Brain className="w-5 h-5 text-blue-600" />
-                  <span className="font-medium text-gray-900">Prediksi untuk besok (Sabtu)</span>
-                </div>
-                
-                <div className="text-2xl font-bold text-gray-900">
-                  Rp 420.000
-                </div>
-                
-                <div className="text-sm text-gray-600 space-y-2">
-                  <p>Berdasarkan data 30 hari terakhir, besok kemungkinan besar akan ramai. Biasanya di hari Sabtu penjualan naik sekitar 32% dibanding hari kerja biasa.</p>
-                  <p>Pola yang sama sudah terjadi 3 kali bulan ini, dan setiap kali hasilnya selalu di atas Rp 400.000.</p>
-                </div>
-                
-                <div className="flex items-center gap-2 text-xs text-blue-600 bg-blue-50 px-3 py-2 rounded-lg">
-                  <Info className="w-3 h-3" />
-                  <span>Confidence level: 90%</span>
+          <Card className="border-0 bg-gradient-to-br from-primary via-primary/90 to-accent text-white">
+            <CardContent className="p-6 py-2">
+              <div className="flex items-center justify-between">
+                <div className="flex flex-col items-start justify-center">
+                  <Badge className="bg-white/20 text-white border-white/30 mb-4">
+                    90% confidence
+                  </Badge>
+                  <div className="flex items-center space-x-1 mb-2">
+                    <Brain className="w-4 h-4" />
+                    <span className="text-sm font-medium">AI Prediction</span>
+                  </div>
+                  <p className="text-3xl font-bold mb-1">Rp 420.000</p>
+                  <p className="text-sm my-2">Berdasarkan data 30 hari terakhir, besok kemungkinan besar akan ramai. Biasanya di hari Sabtu penjualan naik sekitar 32% dibanding hari kerja biasa.</p>
+                  <p className="text-sm">Pola yang sama sudah terjadi 3 kali bulan ini, dan setiap kali hasilnya selalu di atas Rp 400.000.</p>
                 </div>
               </div>
             </CardContent>
@@ -103,7 +84,7 @@ export default function PredictionPage() {
                   <h2 className="text-lg font-semibold text-gray-900">Saran Persiapan</h2>
                 </div>
                 <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                  Berdasarkan Prediksi
+                  Hasil Prediksi
                 </Badge>
               </div>
             </CardHeader>
@@ -179,7 +160,7 @@ export default function PredictionPage() {
                   <h3 className="text-lg font-semibold text-gray-900">Analisis Prediksi</h3>
                 </div>
                 <Badge variant="outline" className="bg-indigo-50 text-indigo-700 border-indigo-200">
-                  Data-Driven
+                  Dari Data
                 </Badge>
               </div>
             </CardHeader>
@@ -306,4 +287,4 @@ export default function PredictionPage() {
       </div>
     </DashboardLayout>
   );
-} 
+}
