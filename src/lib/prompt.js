@@ -1,87 +1,19 @@
 // System instruction for the live conversation model (gemini-2.0-flash-live-001)
 export const LIVE_SYSTEM_INSTRUCTION = `
-You are "Smarteg", an AI assistant for Indonesian food stall owners. Speak Bahasa Indonesia.
-Handle voice commands for: 1) Stock Management ("tambah stok ayam 20 potong"), 2) Sales Recording ("catat pesanan 2 nasi telur"), 3) Menu Announcements ("umumkan rendang siap").
-Always confirm actions: "Oke, stok ayam ditambah 10 potong."
-Be concise, friendly, and efficient.
+Anda adalah “Smarteg”, asisten AI untuk pemilik warung makan Indonesia. Berbicara dalam Bahasa Indonesia.  
+Mengelola perintah suara untuk: 1) Manajemen Stok (“tambah stok ayam 20 potong”), 2) Pencatatan Penjualan (“catat pesanan 2 nasi telur”), 3) Pengumuman Menu (“umumkan rendang siap”).
+Selalu konfirmasikan tindakan: “Oke, stok ayam ditambah 10 potong.”  
+Jadilah ringkas, ramah, dan efisien.
 `;
 
 // Prompt for the text model to generate supply predictions
 export function createPredictionPrompt(historicalData) {
   return `
-You are an AI assistant for Indonesian warteg (food stall) business intelligence. Analyze the historical sales data and generate comprehensive predictions for tomorrow.
+Prediksi jumlah optimal untuk besok berdasarkan data penjualan warteg ini. Kembalikan JSON saja:
+{“ayam goreng”: 25, “tempe orek”: 40}
+Ganti “ayam goreng” dan “tempe orek” sesuai dengan menu yang tersedia dalam data.
 
-**Analysis Requirements:**
-1. Analyze trends, patterns, and seasonality in the sales data
-2. Consider day-of-week patterns (weekday vs weekend behavior)
-3. Look for menu item popularity and sales velocity
-4. Identify any growth or decline trends
-5. Consider typical Indonesian warteg customer behavior
-6. **CRITICAL: Search for current weather forecast for Indonesia tomorrow** - Check online weather sources to determine if tomorrow will be:
-   - Hot/sunny (will increase food sales, especially cold drinks and lighter meals)
-   - Rainy (will decrease outdoor dining, increase delivery/takeaway orders)
-   - Temperature predictions (affects food preferences and customer behavior)
-   - Humidity levels (impacts appetite and food choices)
-
-**Return ONLY a valid JSON object with this exact structure:**
-
-{
-  "revenue_prediction": number (predicted revenue in IDR for tomorrow),
-  "confidence": number (confidence percentage 0-100),
-  "preparation_suggestions": [
-    {
-      "id": "string (unique identifier)",
-      "icon": "emoji (appropriate emoji for the suggestion)",
-      "title": "string (concise suggestion title in Bahasa Indonesia)",
-      "description": "string (detailed description in Bahasa Indonesia including weather considerations)",
-      "quantity": number (optional - specific quantity if applicable),
-      "weather_related": boolean (true if this suggestion is based on weather forecast)
-    }
-  ],
-  "insights": {
-    "trend": {
-      "status": "string (trend description in Bahasa Indonesia)",
-      "details": ["string array of specific trend insights in Bahasa Indonesia"]
-    },
-    "day_pattern": {
-      "status": "string (day pattern description in Bahasa Indonesia)", 
-      "details": ["string array of day-specific patterns in Bahasa Indonesia"]
-    },
-    "weather_impact": {
-      "status": "string (tomorrow's weather forecast + impact description in Bahasa Indonesia)",
-      "details": [
-        "string array of specific weather-related insights in Bahasa Indonesia including:",
-        "- Tomorrow's actual weather forecast (temperature, rain chance, conditions)",
-        "- How weather will specifically affect warteg customer behavior",
-        "- Menu recommendations based on weather (hot food for cold weather, cold drinks for hot weather)",
-        "- Timing adjustments for weather conditions"
-      ]
-    }
-  },
-  "reasoning": "string (natural language explanation of the prediction logic in Bahasa Indonesia)",
-  "stock_predictions": {
-    "menu_item_name": number (predicted quantity needed for tomorrow)
-  }
-}
-
-**Important Guidelines:**
-- All text should be in natural, conversational Bahasa Indonesia
-- Focus on practical, actionable suggestions for warteg operations
-- Include specific quantities for food preparation (e.g., "50 porsi", "30 potong")
-- Consider typical Indonesian eating patterns and peak hours
-- Base confidence on data quality and pattern consistency
-- Make realistic revenue predictions based on historical performance
-- Suggestions should cover: cooking schedule, menu quantities, staffing, peak hour preparation
-- **MANDATORY: Use real-time weather forecast data for tomorrow in Indonesia**
-- Integrate weather impact into all predictions (revenue, menu suggestions, timing)
-- Provide specific weather-based menu recommendations (hot vs cold items)
-- Consider weather impact on customer dining preferences (indoor vs outdoor, delivery vs dine-in)
-- Adjust confidence levels based on weather predictability
-- **CRITICAL: Generate specific stock quantities for each menu item** based on historical data and weather predictions
-- Stock predictions should use exact menu names from the historical data
-- Consider weather impact on stock needs (e.g., more cold drinks if hot weather predicted)
-
-**Historical Sales Data:**
+Data Historis:
 ${JSON.stringify(historicalData, null, 2)}
 
 **WEATHER ANALYSIS REQUIREMENTS:**
@@ -123,7 +55,9 @@ Analyze the historical data AND current weather forecast thoroughly to provide a
 // Prompt for the text model to parse commands
 export function createCommandParserPrompt(transcript, menu_list) {
     return `
-Parse this Bahasa Indonesia transcript into JSON with "action" and "payload" keys only:
+Parsing transkrip Bahasa Indonesia ini menjadi JSON dengan kunci “action” dan “payload” saja:
+
+Transkrip: "${transcript}"
 
 Actions:
 - UPDATE_STOCK: [{"name": string, "counts": number, "price": integer}, ... ]
@@ -132,23 +66,30 @@ Actions:
 - DAILY_REPORT
 - PREDICTION
 - INVALID_MENU: {null}
-- UNKNOWN: {"originalTranscript": string}
+- UNKNOWN: {"action": "UNKNOWN", "payload": {"originalTranscript": string}}
 
 Examples:
 "stok ayam 20 potong" → {"action": "UPDATE_STOCK", "payload": [{"name": "ayam goreng", "counts": 20, "price": 18000}]}
 "pesanan 2 nasi telur" → {"action": "RECORD_SALE", "payload": [{"name": "nasi telur", "counts": 2}]}
-"rendang siap" → {"action": "SOCIAL_POST", "payload": {"name": "rendang", "status": "ready"}}
-"laporan harian" → {"action": "DAILY_REPORT", "payload": null}
+"umumkan rendang siap" → {"action": "SOCIAL_POST", "payload": {"name": "rendang", "status": "ready"}}
+"buat laporan harian" → {"action": "DAILY_REPORT", "payload": null}
 "prediksi stok" → {"action": "PREDICTION", "payload": null}
 
-For update stock, check the prices from this JSON: ${JSON.stringify(menu_list, null, 2)}
+Jangan terpaku pada contoh barusan, maknai sesuai arti di bawah dan tentukan kategori ACTIONS yang paling sesuai berdasarkan konteks transkrip.
 
-For all actions make sure the menu names are valid in this dataset: ${JSON.stringify(menu_list, null, 2)}, if there are invalid names
-then return the invalid_menu action and null payload.
+Arti setiap ACTIONS:
+- UPDATE_STOCK:  ketika pengguna ingin menambahkan stok
+- RECORD_SALE: ketika pengguna ingin mencatat penjualan
+- SOCIAL_POST: ketika pengguna ingin mengumumkan sesuatu di media sosial atau dimanapun
+- DAILY_REPORT: ketika pengguna ingin membuat laporan harian
+- PREDICTION: ketika pengguna ingin memprediksi stok besok
 
-Any other input that you think doesn't fall into the defined actions default to UNKNOWN
+Untuk pembaruan stok, periksa harga dari JSON ini: ${JSON.stringify(menu_list, null, 2)}
 
-Transcript: "${transcript}"
+Untuk semua tindakan, pastikan nama menu valid dalam dataset ini: ${JSON.stringify(menu_list, null, 2)}, jika ada nama yang tidak valid
+maka kembalikan tindakan invalid_menu dan payload null.
+
+PASTIKAN YANG KAMU KEMBALIKAN HANYA SALAH SATU DARI ACTIONS DI ATAS.
     `;
 }
 

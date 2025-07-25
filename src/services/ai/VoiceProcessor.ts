@@ -126,7 +126,7 @@ export class VoiceProcessor {
         }
 
         // Always send interim results
-        if (interimTranscript) {
+        if (interimTranscript && this.isListening) {
           console.log(`🎤 Interim transcript: "${interimTranscript}"`);
           onInterimResult(interimTranscript);
         }
@@ -134,6 +134,7 @@ export class VoiceProcessor {
         // Send final results when we have them
         if (isFinal && finalTranscriptBuffer.trim()) {
           console.log(`✅ Final transcript: "${finalTranscriptBuffer}"`);
+          VoiceProcessor.isListening = false;
           const command: VoiceCommand = {
             text: finalTranscriptBuffer.trim(),
             confidence: event.results[event.results.length - 1][0].confidence,
@@ -186,6 +187,7 @@ export class VoiceProcessor {
    */
   static speak(text: string, options?: Partial<VoiceSettings>): Promise<void> {
     return new Promise((resolve, reject) => {
+      VoiceProcessor.stopListening(this.recognition);
       if (!this.synthesis) {
         reject(new Error('Speech Synthesis not initialized'));
         return;
@@ -211,10 +213,13 @@ export class VoiceProcessor {
    */
   static async processVoiceCommand(transcript: string, getNewToken: () => Promise<{ name: string }>): Promise<any> {
     try {
+      this.isListening = false;
+      VoiceProcessor.stopListening(this.recognition);
       const command = await GenAIService.parseCommand(transcript, getNewToken);
       console.log("✅ Parsed Command:", command);
       return command;
     } catch (error) {
+      
       console.error("❌ Failed to process command with GenAI:", error);
       // Fallback to simpler local processing if GenAI fails
       return this.localProcessVoiceCommand(transcript);

@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Mic, Square, ArrowLeft } from 'lucide-react';
+import { Mic, Square, ArrowLeft, Download, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { geminiAPI } from '../../lib/api';
 import { AIContextProvider, useAIEngine, useVoiceCommands } from '../../context/AIContextProvider';
@@ -23,8 +23,29 @@ function VoiceRecordingComponent() {
     isProcessing, 
     transcript, 
     lastCommand, 
-    error 
+    error,
+    voiceSocialPostResult,
+    isGeneratingSocialPost,
+    // Report generation states and functions from useVoiceCommands
+    generateReport,
+    isGeneratingReport,
+    reportData,
+    reportError
   } = useVoiceCommands();
+
+  // Memoize generateReport to prevent unnecessary re-renders
+  const memoizedGenerateReport = useCallback(() => {
+    console.log('🚀 Calling generateReport from useVoiceCommands hook...');
+    generateReport();
+  }, [generateReport]);
+
+  // Popup state management
+  const [showDownloadPopup, setShowDownloadPopup] = useState(false);
+  const [popupType, setPopupType] = useState<'image' | 'pdf' | null>(null);
+  const [popupData, setPopupData] = useState<any>(null);
+  
+  // Track last processed command timestamp to prevent infinite loops
+  const lastProcessedRef = useRef<number | null>(null);
 
   // Auto-start recording when coming from catat button
   useEffect(() => {
@@ -32,6 +53,45 @@ function VoiceRecordingComponent() {
       handleStartRecording();
     }
   }, [autoStart, isInitialized]);
+
+  // Clear results when starting a new voice command (only clear popup, keep results visible)
+  useEffect(() => {
+    if (isListening) {
+      // Only close popup, but keep results visible so user can still see previous outputs
+      setShowDownloadPopup(false);
+    }
+  }, [isListening]);
+
+  // Monitor lastCommand to trigger report generation and clear conflicting results
+  useEffect(() => {
+    if (lastCommand && lastCommand.timestamp && lastCommand.action === 'DAILY_REPORT') {
+      const commandId = lastCommand.timestamp;
+      
+      // Check if this command has already been processed
+      if (lastProcessedRef.current === commandId) {
+        console.log('⏭️ Command already processed, skipping...');
+        return;
+      }
+      
+      console.log('🔄 Daily report command detected, generating report...', { commandId, lastProcessed: lastProcessedRef.current });
+      
+      // Mark this command as processed
+      lastProcessedRef.current = commandId;
+      
+      // Generate the report using useVoiceCommands hook
+      memoizedGenerateReport();
+    }
+  }, [lastCommand]);
+
+  // Debug reportData changes
+  useEffect(() => {
+    console.log('📊 Report data changed:', { reportData, isReportLoading: isGeneratingReport, reportError });
+  }, [reportData, isGeneratingReport, reportError]);
+
+  // Debug voiceSocialPostResult changes
+  useEffect(() => {
+    console.log('🖼️ Voice social post result changed:', { voiceSocialPostResult, isGeneratingSocialPost, isProcessing });
+  }, [voiceSocialPostResult, isGeneratingSocialPost, isProcessing]);
 
   const handleStartRecording = async () => {
     try {
@@ -56,6 +116,42 @@ function VoiceRecordingComponent() {
       handleStopRecording();
     }
     router.push('/home');
+  };
+
+  const handleDownloadImage = () => {
+    if (popupData && popupData.imageData) {
+      // Create download link for image
+      const link = document.createElement('a');
+      link.href = `data:image/png;base64,${popupData.imageData}`;
+      link.download = `${popupData.menuName || 'menu'}_${popupData.status || 'status'}_${Date.now()}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      console.log('✅ Image download initiated');
+      setShowDownloadPopup(false);
+    }
+  };
+
+  const handleDownloadPdf = () => {
+    if (popupData && popupData.html) {
+      console.log('ℹ️ Preparing PDF download...');
+      const element = document.createElement('div');
+      element.innerHTML = popupData.html;
+      
+      // Use html2pdf.js to generate and download the PDF
+      // @ts-ignore
+      html2pdf(element, {
+        margin: 1,
+        filename: `daily_report_${Date.now()}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+      }).then(() => {
+        console.log('✅ PDF download initiated.');
+        setShowDownloadPopup(false);
+      });
+    }
   };
 
   const getStatusText = () => {
@@ -87,13 +183,6 @@ function VoiceRecordingComponent() {
               <p className="text-white/80">Atur penjualan dan stok dengan suara</p>
             </div>
           </div>
-
-          {/* Status Indicator
-          <div className="text-center mt-8">
-            <div className={`text-lg font-medium text-white`}>
-              Status: {getStatusText()}
-            </div>
-          </div> */}
 
           {/* Recording Status Visual */}
           <div className="mt-8 flex justify-center">
@@ -214,6 +303,140 @@ function VoiceRecordingComponent() {
             </motion.div>
           )}
 
+          {/* Voice Social Post Result Display */}
+          {(voiceSocialPostResult || isGeneratingSocialPost) && (() => {
+            console.log('🎯 Rendering Voice Social Post section:', { 
+              hasResult: !!voiceSocialPostResult, 
+              isGenerating: isGeneratingSocialPost,
+              resultData: voiceSocialPostResult 
+            });
+            return true;
+          })() && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-6"
+            >
+              <h2 className="text-lg font-semibold mb-4 text-gray-800">Hasil Gambar</h2>
+              <div className="bg-green-50 rounded-lg p-4 border border-green-200">
+                {isGeneratingSocialPost ? (
+                  <div className="flex items-center space-x-3">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-600"></div>
+                    <div className="text-green-700">
+                      <p className="font-medium">Sedang membuat gambar...</p>
+                      <p className="text-sm">Harap tunggu, AI sedang menghasilkan gambar makanan yang menarik</p>
+                    </div>
+                  </div>
+                ) : voiceSocialPostResult && voiceSocialPostResult.imageData ? (
+                  <div className="space-y-4">
+                    <div className="text-sm text-green-700">
+                      <p><strong>Menu:</strong> {voiceSocialPostResult.menuName}</p>
+                      <p><strong>Status:</strong> {voiceSocialPostResult.status}</p>
+                      <p><strong>Debug:</strong> Image data length: {voiceSocialPostResult.imageData?.length || 0} characters</p>
+                    </div>
+                    <div className="flex justify-center">
+                      <img 
+                        src={`data:image/png;base64,${voiceSocialPostResult.imageData}`}
+                        alt={`Generated image of ${voiceSocialPostResult.menuName}`}
+                        className="w-full max-w-md h-auto rounded-lg shadow-md border"
+                        onLoad={() => console.log('✅ Image loaded successfully')}
+                        onError={(e) => console.error('❌ Image failed to load:', e)}
+                      />
+                    </div>
+                    <div className="flex justify-center">
+                      <button
+                        onClick={() => {
+                          setPopupType('image');
+                          setPopupData(voiceSocialPostResult);
+                          setShowDownloadPopup(true);
+                        }}
+                        className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-primary to-accent text-white rounded-lg font-medium hover:opacity-90 transition-opacity space-x-2"
+                      >
+                        <Download size={16} />
+                        <span>Download Gambar</span>
+                      </button>
+                    </div>
+                  </div>
+                ) : voiceSocialPostResult && voiceSocialPostResult.error ? (
+                  <div className="bg-red-100 border border-red-300 rounded p-3">
+                    <p className="text-red-700 text-sm"><strong>Error:</strong> {voiceSocialPostResult.error}</p>
+                  </div>
+                ) : null}
+              </div>
+            </motion.div>
+          )}
+
+          {/* Report Display */}
+          {(isGeneratingReport || reportData) && !isProcessing && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-6"
+            >
+              <h2 className="text-lg font-semibold mb-4 text-gray-800">Laporan Harian</h2>
+              <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                {isGeneratingReport ? (
+                  <div className="flex items-center space-x-3">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                    <div className="text-blue-700">
+                      <p className="font-medium">Sedang membuat laporan harian...</p>
+                      <p className="text-sm">Menganalisis data penjualan dan stok</p>
+                    </div>
+                  </div>
+                ) : reportData && reportData.html ? (
+                  <div className="space-y-4">
+                    <div className="text-sm text-blue-700">
+                      <p><strong>Status:</strong> Laporan berhasil dibuat</p>
+                      <p><strong>Tanggal:</strong> {new Date().toLocaleDateString('id-ID')}</p>
+                    </div>
+                    
+                    {/* PDF Ready Indicator */}
+                    <div className="bg-white rounded-lg p-4 border border-blue-200">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center">
+                          <span className="text-lg">✅</span>
+                        </div>
+                        <div>
+                          <h4 className="font-medium text-gray-800">Laporan Berhasil Dibuat</h4>
+                          <p className="text-sm text-gray-600">Laporan harian telah siap untuk diunduh dalam format PDF</p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-gray-50 rounded-lg p-3 border border-blue-200">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                          <span className="text-sm">📄</span>
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-800">Laporan siap diunduh</p>
+                          <p className="text-sm text-gray-600">Format PDF - ~{Math.round(reportData.html.length / 1024)} KB</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex justify-center">
+                      <button
+                        onClick={() => {
+                          setPopupType('pdf');
+                          setPopupData(reportData);
+                          setShowDownloadPopup(true);
+                        }}
+                        className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg font-medium hover:opacity-90 transition-opacity space-x-2"
+                      >
+                        <Download size={16} />
+                        <span>Download PDF</span>
+                      </button>
+                    </div>
+                  </div>
+                ) : reportError ? (
+                  <div className="bg-red-100 border border-red-300 rounded p-3">
+                    <p className="text-red-700 text-sm"><strong>Error:</strong> {reportError}</p>
+                  </div>
+                ) : null}
+              </div>
+            </motion.div>
+          )}
+
           {/* Error Display */}
           {error && (
             <motion.div
@@ -270,6 +493,18 @@ function VoiceRecordingComponent() {
                     </div>
                   </div>
                 </div>
+
+                <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-purple-400/20 rounded-lg flex items-center justify-center">
+                      <span className="text-sm">📊</span>
+                    </div>
+                    <div>
+                      <p className="text-gray-900 font-medium text-sm">Daily Report</p>
+                      <p className="text-gray-600 text-xs">"buat laporan harian"</p>
+                    </div>
+                  </div>
+                </div>
                 
                 <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
                   <div className="flex items-center space-x-3">
@@ -287,6 +522,92 @@ function VoiceRecordingComponent() {
           </div>
         </div>
       </div>
+
+      {/* Download Popup */}
+      <AnimatePresence>
+        {showDownloadPopup && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+            onClick={() => setShowDownloadPopup(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white rounded-2xl p-4 sm:p-6 max-w-xs sm:max-w-md w-full mx-4 shadow-xl max-h-[90vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between mb-4 sm:mb-6">
+                <h3 className="text-lg sm:text-xl font-bold text-gray-800">
+                  {popupType === 'image' ? 'Download Gambar' : 'Download Laporan'}
+                </h3>
+                <button
+                  onClick={() => setShowDownloadPopup(false)}
+                  className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+                >
+                  <X size={20} className="text-gray-600" />
+                </button>
+              </div>
+
+              {/* Content */}
+              <div className="mb-4 sm:mb-6">
+                {popupType === 'image' && popupData ? (
+                  <div className="space-y-3 sm:space-y-4">
+                    <img 
+                      src={`data:image/png;base64,${popupData.imageData}`}
+                      alt={`Generated image of ${popupData.menuName}`}
+                      className="w-full h-auto rounded-lg shadow-md border max-h-60 sm:max-h-80 object-cover"
+                    />
+                    <div className="text-sm text-gray-600">
+                      <p><strong>Menu:</strong> {popupData.menuName}</p>
+                      <p><strong>Status:</strong> {popupData.status === 'ready' ? 'Siap disajikan' : 'Sold out'}</p>
+                    </div>
+                  </div>
+                ) : popupType === 'pdf' && popupData ? (
+                  <div className="space-y-4">
+                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                      <div className="flex items-center space-x-3 mb-3">
+                        <div className="w-10 h-10 bg-red-500/20 rounded-lg flex items-center justify-center">
+                          <span className="text-lg">📄</span>
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-800">Laporan Harian</p>
+                          <p className="text-sm text-gray-600">Siap untuk diunduh dalam format PDF</p>
+                        </div>
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        <p><strong>Tanggal:</strong> {new Date().toLocaleDateString('id-ID')}</p>
+                        <p><strong>Size:</strong> ~{Math.round(popupData.html.length / 1024)} KB</p>
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+
+              {/* Actions */}
+              <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
+                <button
+                  onClick={() => setShowDownloadPopup(false)}
+                  className="flex-1 px-4 py-2 sm:py-3 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors text-sm sm:text-base"
+                >
+                  Tutup
+                </button>
+                <button
+                  onClick={popupType === 'image' ? handleDownloadImage : handleDownloadPdf}
+                  className="flex-1 px-4 py-2 sm:py-3 bg-gradient-to-r from-primary to-accent text-white rounded-xl font-medium hover:opacity-90 transition-opacity flex items-center justify-center space-x-2 text-sm sm:text-base"
+                >
+                  <Download size={16} className="sm:w-5 sm:h-5" />
+                  <span>Download {popupType === 'image' ? 'Gambar' : 'PDF'}</span>
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Bottom Navigation */}
       <BottomNav />

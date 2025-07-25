@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { geminiAPI } from '../../lib/api';
 import { AIContextProvider, useAIEngine, useVoiceCommands } from '../../context/AIContextProvider';
-import { useReport } from '../../hooks/useAI';
 import { GenAIService } from '../../services/ai/GenAIService';
 import type { PredictionData } from '../../types/ai';
 
@@ -15,12 +14,26 @@ const getNewToken = async () => {
 // Test component that uses the AI context
 function AITestComponent() {
   const { voice, webSocket, prediction, isInitialized } = useAIEngine();
-  const { startListening, stopListening, isListening, isProcessing, transcript, lastCommand, error, voiceSocialPostResult, isGeneratingSocialPost } = useVoiceCommands();
+  const { 
+    startListening, 
+    stopListening, 
+    isListening, 
+    isProcessing, 
+    transcript, 
+    lastCommand, 
+    error, 
+    voiceSocialPostResult, 
+    isGeneratingSocialPost,
+    // Report generation states and functions from useVoiceCommands
+    generateReport,
+    isGeneratingReport,
+    reportData,
+    reportError
+  } = useVoiceCommands();
 
   const [predictionResult, setPredictionResult] = useState<PredictionData[] | null>(null);
   const [predictionLoading, setPredictionLoading] = useState(false);
   
-  const { reportData, isLoading: isReportLoading, error: reportError, generateReport } = useReport(getNewToken);
   const [lastProcessedCommand, setLastProcessedCommand] = useState<any>(null);
 
   // Social Post Generation Test State
@@ -334,11 +347,11 @@ function AITestComponent() {
         <h2 className="text-xl font-semibold mb-4">Daily Report</h2>
         
         <button
-          onClick={generateReport}
-          disabled={isReportLoading || !isInitialized}
+          onClick={() => generateReport()}
+          disabled={isGeneratingReport || !isInitialized}
           className="px-6 py-2 bg-purple-500 text-white rounded disabled:bg-gray-400 disabled:cursor-not-allowed"
         >
-          {isReportLoading ? 'Generating Report...' : 'Generate Daily Report'}
+          {isGeneratingReport ? 'Generating Report...' : 'Generate Daily Report'}
         </button>
 
         {reportData && (
