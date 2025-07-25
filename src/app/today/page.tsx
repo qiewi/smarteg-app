@@ -73,10 +73,10 @@ export default function TodayPage() {
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center space-x-4">
-          <Link href="/home">
-            <Button variant="ghost" size="sm" className="p-2">
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
+          <Link href="/home" className="inline-flex items-center justify-center w-10 h-10 bg-gray-300/40 backdrop-blur-sm border border-gray-400/30 rounded-md text-white hover:bg-white/30 transition-colors">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
           </Link>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Penjualan Hari Ini</h1>

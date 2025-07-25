@@ -1,8 +1,7 @@
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, Brain, TrendingUp, Calendar, Zap } from "lucide-react";
+import { Brain, TrendingUp, Calendar, Zap } from "lucide-react";
 import Link from "next/link";
 
 export default function PredictionPage() {
@@ -12,10 +11,10 @@ export default function PredictionPage() {
         {/* Header Section */}
         <section>
           <div className="flex items-center space-x-4">
-            <Link href="/home">
-              <Button variant="ghost" size="sm" className="p-2">
-                <ArrowLeft className="w-5 h-5" />
-              </Button>
+            <Link href="/home" className="inline-flex items-center justify-center w-10 h-10 bg-gray-300/40 backdrop-blur-sm border border-gray-400/30 rounded-md text-white hover:bg-white/30 transition-colors">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
             </Link>
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Prediksi Penjualan</h1>
