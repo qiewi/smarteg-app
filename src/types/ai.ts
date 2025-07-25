@@ -168,6 +168,13 @@ export interface VoiceCommandsContextType {
   transcript: string;
   lastCommand: any;
   error: string | null;
+  voiceSocialPostResult: {
+    imageData: string | null;
+    menuName: string;
+    status: string;
+    timestamp: number;
+    error?: string;
+  } | null;
 }
 
 export interface UseWebSocketReturn {
