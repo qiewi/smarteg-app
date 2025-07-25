@@ -77,7 +77,6 @@ export default function PredictionPage() {
     try {
       // Try to get token from API first
       const token = await geminiAPI.getToken();
-      console.log('Token response:', token);
       
       // Check if token has the expected nested structure (data.name)
       if (token && typeof token === 'object' && 'data' in token && 
@@ -94,16 +93,12 @@ export default function PredictionPage() {
       if (token && typeof token === 'string') {
         return { name: token };
       }
-      
-      console.error('Invalid token structure:', token);
       throw new Error(`Invalid token structure: ${JSON.stringify(token)}`);
     } catch (error) {
-      console.error('Failed to get Gemini token from API:', error);
       
       // Fallback: try to use environment variable
       const envToken = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
       if (envToken) {
-        console.log('Using environment variable as fallback token');
         return { name: envToken };
       }
       
@@ -116,14 +111,8 @@ export default function PredictionPage() {
     setError(null);
     
     try {
-      // Test token first
-      console.log('Testing token retrieval...');
       const testToken = await getNewToken();
-      console.log('Token retrieved successfully:', testToken ? 'Yes' : 'No');
-      
-      console.log('Calling GenAI prediction service...');
       const predictions = await GenAIService.getSupplyPrediction(getNewToken);
-      console.log('Predictions received:', predictions);
       
       // Save to state
       setPredictionData(predictions);
@@ -136,7 +125,6 @@ export default function PredictionPage() {
       setLastGenerated(timestamp);
       setHasGenerated(true);
     } catch (err) {
-      console.error('Failed to generate predictions:', err);
       
       // Check if it's a token issue
       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
@@ -311,7 +299,6 @@ export default function PredictionPage() {
         setLastGenerated(parsedDate);
         setHasGenerated(true);
       } catch (error) {
-        console.error('Failed to load saved predictions:', error);
         // Clear corrupted data
         localStorage.removeItem('warteg_predictions');
         localStorage.removeItem('warteg_predictions_timestamp');

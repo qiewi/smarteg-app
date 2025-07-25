@@ -124,7 +124,6 @@ export default function WasteClient() {
   const getNewToken = async (): Promise<{ name: string }> => {
     try {
       const response = await geminiAPI.getToken();
-      console.log('Token response structure:', response);
       
       // Handle nested response structure
       if (response && typeof response === 'object' && response !== null) {
@@ -139,7 +138,6 @@ export default function WasteClient() {
       // Fallback to environment variable
       const fallbackKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
       if (fallbackKey) {
-        console.log('Using fallback API key from environment');
         return { name: fallbackKey };
       }
       
@@ -150,7 +148,6 @@ export default function WasteClient() {
       // Fallback to environment variable
       const fallbackKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
       if (fallbackKey) {
-        console.log('Using fallback API key from environment');
         return { name: fallbackKey };
       }
       
@@ -169,15 +166,12 @@ export default function WasteClient() {
       setIsAnalyzing(true);
       setAnalysisError(null);
 
-      console.log('Generating waste analysis...');
       const analysis = await GenAIService.getWasteAnalysis(
         wasteData,
         rawSalesData,
         rawStockData,
         getNewToken
       );
-
-      console.log('Generated waste analysis:', analysis);
       setAiAnalysis(analysis);
       setHasGenerated(true);
       const timestamp = new Date();
@@ -270,8 +264,6 @@ export default function WasteClient() {
         setLoading(true);
         setError(null);
 
-        console.log('Fetching waste data...');
-
         // Fetch all data in parallel with individual error handling
         const [menuResponse, stockResponse, salesResponse] = await Promise.all([
           menuAPI.getMenu().catch(err => {
@@ -280,7 +272,6 @@ export default function WasteClient() {
           }),
           stockAPI.getDailyStock().catch(err => {
             console.error('Stock API failed:', err);
-            console.log('Stock API might not be available, using fallback');
             return { data: { stocks: [] } }; // Fallback to empty stocks
           }),
           salesAPI.getDailySales().catch(err => {
@@ -289,15 +280,9 @@ export default function WasteClient() {
           })
         ]);
 
-        console.log('Menu response:', menuResponse);
-        console.log('Stock response:', stockResponse);
-        console.log('Sales response:', salesResponse);
-
         const menuData = (menuResponse as MenuResponse).data.menu;
         const stockData = (stockResponse as StockResponse).data?.stocks || [];
         const salesData = (salesResponse as DailySalesResponse).data.items;
-
-        console.log('Parsed data:', { menuData, stockData, salesData });
 
         // Store raw data for AI analysis
         setRawSalesData(salesResponse);
@@ -318,8 +303,6 @@ export default function WasteClient() {
           const waste = Math.max(0, initialStock - sold - currentStock);
           const wastePercentage = initialStock > 0 ? (waste / initialStock) * 100 : 0;
           
-          console.log(`${menuItem.name}: initial=${initialStock}, sold=${sold}, current=${currentStock}, waste=${waste}`);
-          
           return {
             name: menuItem.name,
             icon: menuItem.icon,
@@ -330,7 +313,6 @@ export default function WasteClient() {
           };
         });
 
-        console.log('Final waste items:', wasteItems);
         setWasteData(wasteItems);
       } catch (error) {
         console.error('Error fetching waste data:', error);
