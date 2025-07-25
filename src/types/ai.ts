@@ -176,6 +176,11 @@ export interface VoiceCommandsContextType {
     error?: string;
   } | null;
   isGeneratingSocialPost: boolean;
+  // Report generation states and functions
+  generateReport: () => Promise<{ text: string; html: string } | null>;
+  isGeneratingReport: boolean;
+  reportData: { text: string; html: string } | null;
+  reportError: string | null;
 }
 
 export interface UseWebSocketReturn {

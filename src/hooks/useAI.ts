@@ -297,6 +297,14 @@ export function useVoiceCommands(getNewToken: () => Promise<{ name: string }>) {
   } | null>(null);
   const [isGeneratingSocialPost, setIsGeneratingSocialPost] = useState(false);
 
+  // Report generation state
+  const [reportData, setReportData] = useState<{
+    text: string;
+    html: string;
+  } | null>(null);
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
+  const [reportError, setReportError] = useState<string | null>(null);
+
   useEffect(() => {
     const init = async () => {
       try {
@@ -317,16 +325,20 @@ export function useVoiceCommands(getNewToken: () => Promise<{ name: string }>) {
 
   // Generate daily report function
   const generateReport = useCallback(async () => {
+    setIsGeneratingReport(true);
+    setReportError(null);
+    setReportData(null);
     try {
       const report = await GenAIService.generateDailyReport(getNewToken);
       console.log('Daily report generated:', report);
-      // The report is generated and logged. You can extend this to:
-      // - Save to local state
-      // - Show in UI
-      // - Send via WebSocket
-      // - Store in database via API call
+      setReportData(report);
+      return report;
     } catch (err) {
       console.error('Failed to generate report:', err);
+      setReportError(err instanceof Error ? err.message : 'Unknown error');
+      return null;
+    } finally {
+      setIsGeneratingReport(false);
     }
   }, [getNewToken]);
 
@@ -435,7 +447,7 @@ export function useVoiceCommands(getNewToken: () => Promise<{ name: string }>) {
           break;
         case 'DAILY_REPORT':
           feedbackMessage = "Oke, laporan harian sedang dibuat. Mohon tunggu sebentar.";
-          generateReport();
+          await generateReport();
           break;
         case 'PREDICTION':
           feedbackMessage = "Oke, prediksi stok sedang dibuat. Mohon tunggu sebentar.";
@@ -525,34 +537,10 @@ export function useVoiceCommands(getNewToken: () => Promise<{ name: string }>) {
     error,
     voiceSocialPostResult,
     isGeneratingSocialPost,
-  };
-} 
-
-/**
- * Hook for generating daily reports
- */
-export function useReport(getNewToken: () => Promise<{ name: string }>) {
-  const [reportData, setReportData] = useState<{ text: string; html: string } | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const generateReport = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const report = await GenAIService.generateDailyReport(getNewToken);
-      setReportData(report);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to generate report');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [getNewToken]);
-
-  return {
-    reportData,
-    isLoading,
-    error,
+    // Report generation states and functions
     generateReport,
+    isGeneratingReport,
+    reportData,
+    reportError,
   };
 } 

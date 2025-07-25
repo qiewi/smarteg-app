@@ -134,6 +134,7 @@ export class VoiceProcessor {
         // Send final results when we have them
         if (isFinal && finalTranscriptBuffer.trim()) {
           console.log(`✅ Final transcript: "${finalTranscriptBuffer}"`);
+          VoiceProcessor.isListening = false;
           const command: VoiceCommand = {
             text: finalTranscriptBuffer.trim(),
             confidence: event.results[event.results.length - 1][0].confidence,
@@ -218,6 +219,7 @@ export class VoiceProcessor {
       console.log("✅ Parsed Command:", command);
       return command;
     } catch (error) {
+      
       console.error("❌ Failed to process command with GenAI:", error);
       // Fallback to simpler local processing if GenAI fails
       return this.localProcessVoiceCommand(transcript);
