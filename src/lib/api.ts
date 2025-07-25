@@ -153,7 +153,7 @@ export const menuAPI = {
   
   // Add new menu item
   addMenuItem: (menuData: any) =>
-    apiClient.post('/menu', menuData),
+    apiClient.post(API_CONFIG.ENDPOINTS.MENU_CREATE, menuData),
   
   // Update menu item
   updateMenuItem: (id: string, menuData: any) =>

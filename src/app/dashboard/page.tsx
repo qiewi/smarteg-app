@@ -245,7 +245,7 @@ export default function DashboardPage() {
                   </div>
                 ) : (
                   <ResponsiveContainer width="100%" height="100%" className="justify-start items-start">
-                    <LineChart data={chartData} className="ml-[-32] max-w-full" margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
+                    <LineChart data={chartData} className="max-w-full" margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                       <XAxis 
                         dataKey="name" 
@@ -325,7 +325,7 @@ export default function DashboardPage() {
                           
                           <div>
                             <p className="text-xs text-gray-500">Total Terjual</p>
-                            <p className="font-medium text-blue-600">{item.sold} porsi</p>
+                            <p className="font-medium text-secondary-400">{item.sold} porsi</p>
                           </div>
 
                           <div>
