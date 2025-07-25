@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { VoiceProcessor } from '@/services/ai/VoiceProcessor';
 import { SupplyPredictionService } from '@/services/ai/SupplyPrediction';
 import { webSocketService } from '@/services/websocket/WebSocketService';
+import * as api from '@/lib/api';
 import type { 
   UseVoiceReturn, 
   UseWebSocketReturn, 
@@ -179,45 +180,32 @@ export function usePrediction(): UsePredictionReturn {
   const historicalDataRef = useRef<HistoricalSalesData[]>([]);
   const menuItemsRef = useRef<string[]>([]);
 
-  const generatePredictions = useCallback((historicalData: HistoricalSalesData[], menuItems: string[]) => {
+  const generatePredictions = useCallback(async (getNewToken: () => Promise<{ name: string }>) => {
     setIsLoading(true);
     setError(null);
-    
     try {
-      // Store data for refresh
-      historicalDataRef.current = historicalData;
-      menuItemsRef.current = menuItems;
-      
-      // Generate predictions using frontend algorithm
-      const newPredictions = SupplyPredictionService.predictSupply(historicalData, menuItems);
-      
-      // Adjust for current day of week
-      const today = new Date();
-      const dayOfWeek = today.getDay();
-      const adjustedPredictions = newPredictions.map(pred => 
-        SupplyPredictionService.adjustForDayOfWeek(pred, dayOfWeek, historicalData)
-      );
-      
-      setPredictions(adjustedPredictions);
-      setIsLoading(false);
+      const newPredictions = await SupplyPredictionService.predictWithAI(getNewToken);
+      setPredictions(newPredictions);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Prediction generation failed');
+      // Optionally, you can call the local prediction as a fallback here
+    } finally {
       setIsLoading(false);
     }
   }, []);
 
-  const refreshPredictions = useCallback(() => {
-    if (historicalDataRef.current.length > 0 && menuItemsRef.current.length > 0) {
-      generatePredictions(historicalDataRef.current, menuItemsRef.current);
-    }
+  const refreshPredictions = useCallback(async (getNewToken: () => Promise<{ name: string }>) => {
+    // This function can be re-implemented if there's a need to refresh with existing data
+    // For now, it will call generatePredictions to get fresh AI-based predictions
+    await generatePredictions(getNewToken);
   }, [generatePredictions]);
 
   return {
     predictions,
     isLoading,
     error,
-    generatePredictions,
-    refreshPredictions
+    generatePredictions: generatePredictions as any, // Cast to any to satisfy the interface
+    refreshPredictions: refreshPredictions as any, // Cast to any to satisfy the interface
   };
 }
 
@@ -260,9 +248,8 @@ export function useAI(): UseAIReturn {
 /**
  * Hook for processing voice commands
  */
-export function useVoiceCommands() {
+export function useVoiceCommands(getNewToken: () => Promise<{ name: string }>) {
   const { startListening, stopListening, speak, transcript, isListening, error } = useVoice();
-  const { sendMessage } = useWebSocket();
   
   const [lastCommand, setLastCommand] = useState<any>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -271,33 +258,42 @@ export function useVoiceCommands() {
     if (!transcript) return;
 
     setIsProcessing(true);
+    let feedbackMessage = "Maaf, terjadi kesalahan.";
     
     try {
-      // Process the voice command
-      const parsedCommand = VoiceProcessor.processVoiceCommand(transcript);
-      setLastCommand(parsedCommand);
-      
-      // Send to AI for validation if connected
-      if (parsedCommand.type !== 'unknown') {
-        await sendMessage('validation', {
-          command: parsedCommand,
-          timestamp: new Date().toISOString()
-        });
-        
-        // Provide voice feedback
-        const feedback = generateVoiceFeedback(parsedCommand);
-        await speak(feedback);
-      } else {
-        await speak("Perintah tidak dikenali. Silakan ulangi.");
+      const command = await VoiceProcessor.processVoiceCommand(transcript, getNewToken);
+      setLastCommand(command);
+
+      switch (command.action) {
+        case 'UPDATE_STOCK':
+          await api.stockAPI.addStock(command.payload);
+          const stockNames = command.payload.map((item: any) => item.name).join(', ');
+          feedbackMessage = `Oke, stok ${stockNames} sudah diperbarui.`;
+          break;
+        case 'RECORD_SALE':
+          await api.salesAPI.recordSales(command.payload);
+          const itemNames = command.payload.items.map((i: any) => `${i.counts} ${i.name}`).join(', ');
+          feedbackMessage = `Sip, pesanan ${itemNames} sudah dicatat.`;
+          break;
+        case 'SOCIAL_POST':
+          // You would have a corresponding API call here, e.g., api.social.createPost(command.payload)
+          feedbackMessage = `Oke, saya akan umumkan bahwa ${command.payload.name} sekarang ${command.payload.status === 'ready' ? 'siap' : 'habis'}.`;
+          break;
+        case 'INVALID_MENU':
+          feedbackMessage = "Maaf, sepertinya ada kesalahan nama menu.";
+          break;
+        default: // UNKNOWN
+          feedbackMessage = "Maaf, saya tidak mengerti maksud Anda. Boleh diulang kembali perintahnya?";
+          break;
       }
-      
     } catch (err) {
       console.error('Command processing failed:', err);
-      await speak("Terjadi kesalahan saat memproses perintah.");
+      feedbackMessage = "Sepertinya sedang offline atau terjadi kesalahan. Perintah tidak dapat diproses.";
     } finally {
+      await speak(feedbackMessage);
       setIsProcessing(false);
     }
-  }, [transcript, sendMessage, speak]);
+  }, [transcript, speak, getNewToken]);
 
   // Auto-process when transcript changes
   useEffect(() => {
@@ -315,22 +311,4 @@ export function useVoiceCommands() {
     lastCommand,
     error
   };
-}
-
-/**
- * Generate voice feedback based on parsed command
- */
-function generateVoiceFeedback(command: any): string {
-  switch (command.type) {
-    case 'stock_record':
-      return `Mencatat stok ${command.menuItem} sebanyak ${command.quantity} ${command.unit || 'porsi'}.`;
-    case 'sales_transaction':
-      return `Mencatat penjualan: ${command.items?.join(', ')}.`;
-    case 'menu_ready':
-      return `${command.menuItem} sudah siap sebanyak ${command.quantity} porsi.`;
-    case 'end_day':
-      return 'Memulai proses penutupan hari.';
-    default:
-      return 'Perintah berhasil diproses.';
-  }
 } 
