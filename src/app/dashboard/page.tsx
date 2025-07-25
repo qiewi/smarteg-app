@@ -8,7 +8,7 @@ import { Plus, BarChart3, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { getDailySales, getWeeklySales, getMonthlySales, SalesData } from "@/lib/api";
+import { getDailySales, getWeeklySales, getMonthlySales, SalesData, menuAPI } from "@/lib/api";
 
 interface MenuItemDisplay {
   id: number;
@@ -24,49 +24,24 @@ interface ChartDataPoint {
   date: string;
 }
 
+interface MenuResponse {
+  data: {
+    menu: {
+      name: string;
+      icon: string;
+      capital: number;
+      price: number;
+    }[];
+  };
+}
+
 export default function DashboardPage() {
   const [selectedPeriod, setSelectedPeriod] = useState<"1D" | "1W" | "1M">("1W");
   const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
+  const [menuItems, setMenuItems] = useState<MenuItemDisplay[]>([]);
   const [loading, setLoading] = useState(false);
+  const [menuLoading, setMenuLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  const menuItems: MenuItemDisplay[] = [
-    {
-      id: 1,
-      emoji: "🍛",
-      name: "Nasi Gudeg",
-      sold: 47,
-      revenue: 564000
-    },
-    {
-      id: 2,
-      emoji: "🍳",
-      name: "Nasi Telur Dadar",
-      sold: 62,
-      revenue: 496000
-    },
-    {
-      id: 3,
-      emoji: "🐟",
-      name: "Ikan Bakar",
-      sold: 23,
-      revenue: 345000
-    },
-    {
-      id: 4,
-      emoji: "🥬",
-      name: "Sayur Lodeh",
-      sold: 38,
-      revenue: 190000
-    },
-    {
-      id: 5,
-      emoji: "🍗",
-      name: "Ayam Goreng",
-      sold: 31,
-      revenue: 558000
-    }
-  ];
 
   const formatChartData = (salesData: SalesData[], period: "1D" | "1W" | "1M"): ChartDataPoint[] => {
     return salesData.map((data, index) => {
@@ -89,24 +64,81 @@ export default function DashboardPage() {
     });
   };
 
+  const fetchMenuData = async () => {
+    try {
+      setMenuLoading(true);
+      
+      // Fetch menu and sales data in parallel
+      const [menuResponse, salesData] = await Promise.all([
+        menuAPI.getMenu(),
+        fetchSalesDataForPeriod(selectedPeriod)
+      ]);
+
+      const menuData = (menuResponse as MenuResponse).data.menu;
+      
+      // Aggregate sales data across all dates for the selected period
+      const salesAggregation: { [key: string]: { sold: number; revenue: number } } = {};
+      
+      salesData.forEach(dayData => {
+        dayData.items.forEach(item => {
+          if (!salesAggregation[item.name]) {
+            salesAggregation[item.name] = { sold: 0, revenue: 0 };
+          }
+          salesAggregation[item.name].sold += item.counts;
+        });
+      });
+
+      // Calculate revenue for each menu item
+      const menuItemsWithSales: MenuItemDisplay[] = menuData.map((menuItem, index) => {
+        const salesInfo = salesAggregation[menuItem.name] || { sold: 0, revenue: 0 };
+        const revenue = salesInfo.sold * menuItem.price;
+        
+        return {
+          id: index + 1,
+          emoji: menuItem.icon,
+          name: menuItem.name,
+          sold: salesInfo.sold,
+          revenue: revenue
+        };
+      });
+
+      setMenuItems(menuItemsWithSales);
+    } catch (error) {
+      console.error('Error fetching menu data:', error);
+      setError('Gagal memuat data menu');
+      
+      // Fallback to static data
+      setMenuItems([
+        { id: 1, emoji: "🍛", name: "Nasi Gudeg", sold: 47, revenue: 564000 },
+        { id: 2, emoji: "🍳", name: "Nasi Telur Dadar", sold: 62, revenue: 496000 },
+        { id: 3, emoji: "🐟", name: "Ikan Bakar", sold: 23, revenue: 345000 },
+        { id: 4, emoji: "🥬", name: "Sayur Lodeh", sold: 38, revenue: 190000 },
+        { id: 5, emoji: "🍗", name: "Ayam Goreng", sold: 31, revenue: 558000 }
+      ]);
+    } finally {
+      setMenuLoading(false);
+    }
+  };
+
+  const fetchSalesDataForPeriod = async (period: "1D" | "1W" | "1M"): Promise<SalesData[]> => {
+    if (period === "1D") {
+      const response = await getDailySales();
+      return [response.data];
+    } else if (period === "1W") {
+      const response = await getWeeklySales();
+      return response.data.weeklySales;
+    } else {
+      const response = await getMonthlySales();
+      return response.data.monthlySales;
+    }
+  };
+
   const fetchSalesData = async (period: "1D" | "1W" | "1M") => {
     setLoading(true);
     setError(null);
     
     try {
-      let salesData: SalesData[] = [];
-      
-      if (period === "1D") {
-        const response = await getDailySales();
-        salesData = [response.data];
-      } else if (period === "1W") {
-        const response = await getWeeklySales();
-        salesData = response.data.weeklySales;
-      } else {
-        const response = await getMonthlySales();
-        salesData = response.data.monthlySales;
-      }
-      
+      const salesData = await fetchSalesDataForPeriod(period);
       const formattedData = formatChartData(salesData, period);
       setChartData(formattedData);
     } catch (err) {
@@ -147,6 +179,10 @@ export default function DashboardPage() {
   useEffect(() => {
     fetchSalesData(selectedPeriod);
   }, [selectedPeriod]);
+
+  useEffect(() => {
+    fetchMenuData();
+  }, [selectedPeriod]); // Refetch menu data when period changes
 
   const handlePeriodChange = (period: "1D" | "1W" | "1M") => {
     setSelectedPeriod(period);
@@ -209,7 +245,7 @@ export default function DashboardPage() {
                   </div>
                 ) : (
                   <ResponsiveContainer width="100%" height="100%" className="justify-start items-start">
-                    <LineChart data={chartData} className="ml-[-32] max-w-full">
+                    <LineChart data={chartData} className="ml-[-32] max-w-full" margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                       <XAxis 
                         dataKey="name" 
@@ -266,39 +302,48 @@ export default function DashboardPage() {
             </Link>
           </div>
           
-          <div className="space-y-3">
-            {menuItems.map((item) => (
-              <Card key={item.id} className="border border-gray-200">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4 flex-1">
-                      <span className="text-2xl">{item.emoji}</span>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 flex-1">
-                        <div>
-                          <p className="text-xs text-gray-500">Nama Menu</p>
-                          <p className="font-medium">{item.name}</p>
-                        </div>
-                        
-                        <div>
-                          <p className="text-xs text-gray-500">Total Terjual</p>
-                          <p className="font-medium text-blue-600">{item.sold} porsi</p>
-                        </div>
+          {menuLoading ? (
+            <div className="flex justify-center items-center py-8">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 border-4 border-gray-300 border-t-primary rounded-full animate-spin"></div>
+                <div className="text-gray-500">Loading menu...</div>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {menuItems.map((item) => (
+                <Card key={item.id} className="border border-gray-200">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4 flex-1">
+                        <span className="text-2xl">{item.emoji}</span>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 flex-1">
+                          <div>
+                            <p className="text-xs text-gray-500">Nama Menu</p>
+                            <p className="font-medium">{item.name}</p>
+                          </div>
+                          
+                          <div>
+                            <p className="text-xs text-gray-500">Total Terjual</p>
+                            <p className="font-medium text-blue-600">{item.sold} porsi</p>
+                          </div>
 
-                        <div>
-                          <p className="text-xs text-gray-500">Total Pendapatan</p>
-                          <p className="font-medium text-primary">Rp {item.revenue.toLocaleString('id-ID')}</p>
+                          <div>
+                            <p className="text-xs text-gray-500">Total Pendapatan</p>
+                            <p className="font-medium text-primary">Rp {item.revenue.toLocaleString('id-ID')}</p>
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    <Badge variant="outline" className="text-green-600 border-green-200">
-                      {selectedPeriod}
-                    </Badge>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                      <Badge variant="outline" className="text-green-600 border-green-200">
+                        {selectedPeriod}
+                      </Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </section>
       </div>
     </DashboardLayout>
