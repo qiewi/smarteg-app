@@ -27,21 +27,18 @@ export default function WastePage() {
         {/* Waste Reduction Summary Section */}
         <section>
           <Card className="border-0 bg-gradient-to-br from-primary via-primary/90 to-accent text-white">
-            <CardContent className="p-6">
+            <CardContent className="p-6 py-2">
               <div className="flex items-center justify-between">
                 <div>
+                <Badge className="bg-white/20 text-white border-white/30 mb-2">
+                    Excellent!
+                  </Badge>
                   <div className="flex items-center space-x-2 mb-2">
-                    <Leaf className="w-6 h-6" />
+                    <Leaf className="w-4 h-4" />
                     <span className="text-sm font-medium">Pengurangan Waste</span>
                   </div>
                   <p className="text-3xl font-bold mb-1">-8%</p>
                   <p className="text-white/80">Dari minggu lalu</p>
-                </div>
-                <div className="text-right">
-                  <Badge className="bg-white/20 text-white border-white/30 mb-2">
-                    Excellent!
-                  </Badge>
-                  <p className="text-white/80 text-sm">Target tercapai</p>
                 </div>
               </div>
             </CardContent>
