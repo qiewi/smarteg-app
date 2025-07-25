@@ -304,10 +304,11 @@ function VoiceRecordingComponent() {
           )}
 
           {/* Voice Social Post Result Display */}
-          {(voiceSocialPostResult || isGeneratingSocialPost) && (() => {
+          {(voiceSocialPostResult || isGeneratingSocialPost) && (!isProcessing || !isGeneratingSocialPost) && (() => {
             console.log('🎯 Rendering Voice Social Post section:', { 
               hasResult: !!voiceSocialPostResult, 
               isGenerating: isGeneratingSocialPost,
+              isProcessing: isProcessing,
               resultData: voiceSocialPostResult 
             });
             return true;
@@ -327,7 +328,7 @@ function VoiceRecordingComponent() {
                       <p className="text-sm">Harap tunggu, AI sedang menghasilkan gambar makanan yang menarik</p>
                     </div>
                   </div>
-                ) : voiceSocialPostResult && voiceSocialPostResult.imageData ? (
+                ) : voiceSocialPostResult?.imageData ? (
                   <div className="space-y-4">
                     <div className="text-sm text-green-700">
                       <p><strong>Menu:</strong> {voiceSocialPostResult.menuName}</p>
@@ -367,7 +368,15 @@ function VoiceRecordingComponent() {
           )}
 
           {/* Report Display */}
-          {(isGeneratingReport || reportData) && !isProcessing && (
+          {(isGeneratingReport || reportData) && (!isProcessing || !isGeneratingReport) && (() => {
+            console.log('📊 Rendering Report section:', { 
+              hasReportData: !!reportData, 
+              isGenerating: isGeneratingReport,
+              isProcessing: isProcessing,
+              reportData: reportData 
+            });
+            return true;
+          })() && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}

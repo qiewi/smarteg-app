@@ -81,7 +81,7 @@ Arti setiap ACTIONS:
 - UPDATE_STOCK:  ketika pengguna ingin menambahkan stok
 - RECORD_SALE: ketika pengguna ingin mencatat penjualan
 - SOCIAL_POST: ketika pengguna ingin mengumumkan sesuatu di media sosial atau dimanapun
-- DAILY_REPORT: ketika pengguna ingin membuat laporan harian
+- DAILY_REPORT: ketika pengguna meminta laporan harian atau hari ini
 - PREDICTION: ketika pengguna ingin memprediksi stok besok
 
 Untuk pembaruan stok, periksa harga dari JSON ini: ${JSON.stringify(menu_list, null, 2)}

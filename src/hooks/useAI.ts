@@ -339,6 +339,10 @@ export function useVoiceCommands(getNewToken: () => Promise<{ name: string }>) {
       return null;
     } finally {
       setIsGeneratingReport(false);
+      console.log('✅ isGeneratingReport set to false');
+      // Reset isProcessing immediately after generation completes
+      setIsProcessing(false);
+      console.log('⚡ isProcessing reset to FALSE after report generation');
     }
   }, [getNewToken]);
 
@@ -359,6 +363,7 @@ export function useVoiceCommands(getNewToken: () => Promise<{ name: string }>) {
 
   // Generate social post with image
   const generateSocialPost = useCallback(async (payload: any) => {
+    console.log('🖼️ Starting social post generation for:', payload.name);
     setIsGeneratingSocialPost(true);
     
     try {
@@ -410,11 +415,21 @@ export function useVoiceCommands(getNewToken: () => Promise<{ name: string }>) {
       });
     } finally {
       setIsGeneratingSocialPost(false);
+      console.log('✅ isGeneratingSocialPost set to false');
+      // Reset isProcessing immediately after generation completes
+      setIsProcessing(false);
+      console.log('⚡ isProcessing reset to FALSE after social post generation');
     }
   }, [getNewToken]);
 
   const processCommand = useCallback(async (commandText: string) => {
     if (!commandText) return;
+
+    console.log('🚀 processCommand started with:', commandText, {
+      isProcessing: isProcessing,
+      isGeneratingReport: isGeneratingReport,
+      isGeneratingSocialPost: isGeneratingSocialPost
+    });
 
     // Immediately stop listening to prevent interference from new speech
     if (recognitionRef.current && isListening) {
@@ -424,6 +439,7 @@ export function useVoiceCommands(getNewToken: () => Promise<{ name: string }>) {
     }
     
     setIsProcessing(true);
+    console.log('⚡ isProcessing set to TRUE');
     // Clear transcripts to prevent confusion
     setTranscript("");
     setFinalTranscript("");
@@ -433,6 +449,18 @@ export function useVoiceCommands(getNewToken: () => Promise<{ name: string }>) {
     try {
       const command = await VoiceProcessor.processVoiceCommand(commandText, getNewToken);
       setLastCommand({ ...command, timestamp: new Date().getTime() });
+
+      // Clear previous results based on the new command type
+      if (command.action === 'DAILY_REPORT') {
+        // Clear social post results when generating report
+        setVoiceSocialPostResult(null);
+        setIsGeneratingSocialPost(false);
+      } else if (command.action === 'SOCIAL_POST') {
+        // Clear report results when generating social post
+        setReportData(null);
+        setReportError(null);
+        setIsGeneratingReport(false);
+      }
 
       switch (command.action) {
         case 'UPDATE_STOCK':
@@ -447,15 +475,19 @@ export function useVoiceCommands(getNewToken: () => Promise<{ name: string }>) {
           break;
         case 'DAILY_REPORT':
           feedbackMessage = "Oke, laporan harian sedang dibuat. Mohon tunggu sebentar.";
-          await generateReport();
+          console.log('🔄 Starting daily report generation...', { isProcessing: isProcessing });
+          const reportResult = await generateReport();
+          console.log('✅ Daily report generation completed:', !!reportResult, { isProcessing: isProcessing });
           break;
         case 'PREDICTION':
           feedbackMessage = "Oke, prediksi stok sedang dibuat. Mohon tunggu sebentar.";
-          generatePredictions();
+          await generatePredictions();
           break;
         case 'SOCIAL_POST':
           feedbackMessage = `Oke, saya akan umumkan bahwa ${command.payload.name} sekarang ${command.payload.status === 'ready' ? 'siap' : 'habis'}.`;
-          generateSocialPost(command.payload);
+          console.log('🖼️ Starting social post generation...', { isProcessing: isProcessing });
+          await generateSocialPost(command.payload);
+          console.log('✅ Social post generation completed', { isProcessing: isProcessing });
           break;
         case 'INVALID_MENU':
           feedbackMessage = "Maaf, sepertinya ada kesalahan nama menu.";
@@ -468,15 +500,26 @@ export function useVoiceCommands(getNewToken: () => Promise<{ name: string }>) {
       console.error('Command processing failed:', err);
       feedbackMessage = "Sepertinya sedang offline atau terjadi kesalahan. Perintah tidak dapat diproses.";
     } finally {
+      console.log('🏁 About to speak feedback and clear processing state...');
       await speak(feedbackMessage);
-      setIsProcessing(false);
+      console.log('🏁 Speech feedback completed');
+      // isProcessing might already be false from individual generation functions
+      if (isProcessing) {
+        console.log('🏁 Setting isProcessing to false (if not already reset)...');
+        setIsProcessing(false);
+        console.log('⚡ isProcessing set to FALSE in finally block');
+      } else {
+        console.log('ℹ️ isProcessing already false, skipping reset');
+      }
+      console.log('🏁 Processing state cleared, scheduling transcript cleanup...');
       // Clear any remaining transcripts and add small delay to ensure clean state
       setTimeout(() => {
         setTranscript("");
         setFinalTranscript("");
+        console.log('🧹 Transcripts cleaned up');
       }, 100);
     }
-  }, [getNewToken, speak]);
+  }, [getNewToken, speak, generateReport, generatePredictions, generateSocialPost, isListening, isProcessing, isGeneratingReport, isGeneratingSocialPost]);
 
   useEffect(() => {
     if (finalTranscript && !isProcessing && finalTranscript.trim().length > 0) {
@@ -496,7 +539,17 @@ export function useVoiceCommands(getNewToken: () => Promise<{ name: string }>) {
       return;
     }
 
+    // Stop any existing recognition first to prevent conflicts
     try {
+      if (recognitionRef.current) {
+        VoiceProcessor.stopListening(recognitionRef.current);
+      }
+    } catch (e) {
+      console.log('⚠️ Cleanup existing recognition (this is normal)');
+    }
+
+    try {
+      console.log('🎤 Starting voice recognition...');
       setIsListening(true);
       setTranscript("");
       setFinalTranscript("");
@@ -511,12 +564,17 @@ export function useVoiceCommands(getNewToken: () => Promise<{ name: string }>) {
           console.log('Final transcript:', final.text);
           setIsListening(false);
           setFinalTranscript(final.text);
-          setIsListening(false);
         }
       );
     } catch (e) {
       console.error("Error during listening:", e);
       setIsListening(false);
+      // Force cleanup and retry once
+      setTimeout(() => {
+        setIsListening(false);
+        setTranscript("");
+        setFinalTranscript("");
+      }, 500);
     }
   }, [isProcessing]);
 
