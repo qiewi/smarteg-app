@@ -142,3 +142,70 @@ export const salesAPI = {
   recordSales: (salesData: any) =>
     apiClient.put(API_CONFIG.ENDPOINTS.SALES_ADD, salesData),
 }; 
+
+export interface SalesData {
+  sales: number;
+  items: any[];
+  date: string;
+}
+
+export interface DailySalesResponse {
+  status: string;
+  message: string;
+  data: SalesData;
+}
+
+export interface WeeklySalesResponse {
+  status: string;
+  message: string;
+  data: {
+    weeklySales: SalesData[];
+  };
+}
+
+export interface MonthlySalesResponse {
+  status: string;
+  message: string;
+  data: {
+    monthlySales: SalesData[];
+  };
+}
+
+// Helper function to get auth headers
+function getAuthHeaders(): HeadersInit {
+  const token = localStorage.getItem('auth_token');
+  return {
+    'Content-Type': 'application/json',
+    ...(token && { 'Authorization': `Bearer ${token}` })
+  };
+}
+
+export async function getDailySales(): Promise<DailySalesResponse> {
+  const response = await fetch('https://api.smarteg.app/service/sales/daily', {
+    headers: getAuthHeaders()
+  });
+  if (!response.ok) {
+    throw new Error('Failed to fetch daily sales');
+  }
+  return response.json();
+}
+
+export async function getWeeklySales(): Promise<WeeklySalesResponse> {
+  const response = await fetch('https://api.smarteg.app/service/sales/weekly', {
+    headers: getAuthHeaders()
+  });
+  if (!response.ok) {
+    throw new Error('Failed to fetch weekly sales');
+  }
+  return response.json();
+}
+
+export async function getMonthlySales(): Promise<MonthlySalesResponse> {
+  const response = await fetch('https://api.smarteg.app/service/sales/monthly', {
+    headers: getAuthHeaders()
+  });
+  if (!response.ok) {
+    throw new Error('Failed to fetch monthly sales');
+  }
+  return response.json();
+} 

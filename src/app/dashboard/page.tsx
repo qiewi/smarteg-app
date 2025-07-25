@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Plus, BarChart3 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { getDailySales, getWeeklySales, getMonthlySales, SalesData } from "@/lib/api";
 
 interface MenuItemDisplay {
   id: number;
@@ -16,8 +18,17 @@ interface MenuItemDisplay {
   revenue: number;
 }
 
+interface ChartDataPoint {
+  name: string;
+  sales: number;
+  date: string;
+}
+
 export default function DashboardPage() {
   const [selectedPeriod, setSelectedPeriod] = useState<"1D" | "1W" | "1M">("1W");
+  const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const menuItems: MenuItemDisplay[] = [
     {
@@ -57,16 +68,88 @@ export default function DashboardPage() {
     }
   ];
 
-  const chartData = {
-    "1D": [12, 19, 15, 25, 22, 18, 28, 32],
-    "1W": [85, 92, 78, 110, 95, 88, 125],
-    "1M": [2340, 2150, 2680, 2420, 2890]
+  const formatChartData = (salesData: SalesData[], period: "1D" | "1W" | "1M"): ChartDataPoint[] => {
+    return salesData.map((data, index) => {
+      let name: string;
+      const date = new Date(data.date);
+      
+      if (period === "1D") {
+        name = date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+      } else if (period === "1W") {
+        name = date.toLocaleDateString('id-ID', { weekday: 'short' });
+      } else {
+        name = `Minggu ${Math.floor(index / 7) + 1}`;
+      }
+      
+      return {
+        name,
+        sales: data.sales,
+        date: data.date
+      };
+    });
   };
 
-  const chartLabels = {
-    "1D": ["06:00", "09:00", "12:00", "15:00", "18:00", "21:00", "24:00", "03:00"],
-    "1W": ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"],
-    "1M": ["Minggu 1", "Minggu 2", "Minggu 3", "Minggu 4", "Minggu 5"]
+  const fetchSalesData = async (period: "1D" | "1W" | "1M") => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      let salesData: SalesData[] = [];
+      
+      if (period === "1D") {
+        const response = await getDailySales();
+        salesData = [response.data];
+      } else if (period === "1W") {
+        const response = await getWeeklySales();
+        salesData = response.data.weeklySales;
+      } else {
+        const response = await getMonthlySales();
+        salesData = response.data.monthlySales;
+      }
+      
+      const formattedData = formatChartData(salesData, period);
+      setChartData(formattedData);
+    } catch (err) {
+      setError('Gagal memuat data penjualan');
+      console.error('Error fetching sales data:', err);
+      
+      // Fallback data untuk demo
+      const fallbackData = {
+        "1D": [
+          { name: "06:00", sales: 12, date: "2025-01-25" },
+          { name: "09:00", sales: 19, date: "2025-01-25" },
+          { name: "12:00", sales: 25, date: "2025-01-25" },
+          { name: "15:00", sales: 22, date: "2025-01-25" },
+          { name: "18:00", sales: 28, date: "2025-01-25" },
+          { name: "21:00", sales: 32, date: "2025-01-25" }
+        ],
+        "1W": [
+          { name: "Sen", sales: 85, date: "2025-01-20" },
+          { name: "Sel", sales: 92, date: "2025-01-21" },
+          { name: "Rab", sales: 78, date: "2025-01-22" },
+          { name: "Kam", sales: 110, date: "2025-01-23" },
+          { name: "Jum", sales: 95, date: "2025-01-24" },
+          { name: "Sab", sales: 125, date: "2025-01-25" }
+        ],
+        "1M": [
+          { name: "Minggu 1", sales: 2340, date: "2025-01-01" },
+          { name: "Minggu 2", sales: 2150, date: "2025-01-08" },
+          { name: "Minggu 3", sales: 2680, date: "2025-01-15" },
+          { name: "Minggu 4", sales: 2890, date: "2025-01-22" }
+        ]
+      };
+      setChartData(fallbackData[period]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSalesData(selectedPeriod);
+  }, [selectedPeriod]);
+
+  const handlePeriodChange = (period: "1D" | "1W" | "1M") => {
+    setSelectedPeriod(period);
   };
 
   return (
@@ -96,7 +179,7 @@ export default function DashboardPage() {
                 key={period}
                 variant={selectedPeriod === period ? "default" : "outline"}
                 size="sm"
-                onClick={() => setSelectedPeriod(period)}
+                onClick={() => handlePeriodChange(period)}
                 className={`h-8 ${selectedPeriod === period ? "bg-primary text-white" : "bg-white text-gray-700"}`}
               >
                 {period}
@@ -112,20 +195,65 @@ export default function DashboardPage() {
               <CardTitle className="flex items-center space-x-2">
                 <BarChart3 className="w-5 h-5 text-primary" />
                 <span>Grafik Penjualan</span>
+                {error && (
+                  <Badge variant="destructive" className="ml-2">
+                    Data demo
+                  </Badge>
+                )}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
-                <div className="text-center">
-                  <div className="text-4xl mb-4">📊</div>
-                  <p className="text-gray-600 text-sm">
-                    Grafik {selectedPeriod === "1D" ? "Per Jam" : selectedPeriod === "1W" ? "Per Hari" : "Per Minggu"}
-                  </p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Data: {chartData[selectedPeriod].join(", ")} porsi terjual
-                  </p>
-                </div>
+              <div className="h-64">
+                {loading ? (
+                  <div className="h-full bg-gray-50 rounded-lg flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="text-2xl mb-2">⏳</div>
+                      <p className="text-gray-600 text-sm">Memuat data...</p>
+                    </div>
+                  </div>
+                ) : (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={chartData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                      <XAxis 
+                        dataKey="name" 
+                        stroke="#6b7280"
+                        fontSize={12}
+                        tickLine={false}
+                      />
+                      <YAxis 
+                        stroke="#6b7280"
+                        fontSize={12}
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <Tooltip 
+                        contentStyle={{
+                          backgroundColor: 'white',
+                          border: '1px solid #e5e7eb',
+                          borderRadius: '8px',
+                          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                        }}
+                        labelStyle={{ color: '#374151' }}
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="sales" 
+                        stroke="#6366f1" 
+                        strokeWidth={3}
+                        dot={{ fill: '#6366f1', strokeWidth: 2, r: 4 }}
+                        activeDot={{ r: 6, stroke: '#6366f1', strokeWidth: 2 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                )}
               </div>
+              
+              {error && (
+                <p className="text-xs text-gray-500 mt-2 text-center">
+                  Menggunakan data demo karena gagal terhubung ke server
+                </p>
+              )}
             </CardContent>
           </Card>
         </section>
