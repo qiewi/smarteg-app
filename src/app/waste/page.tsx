@@ -1,8 +1,7 @@
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { TrendingDown, ArrowLeft, Trash2, Target, AlertTriangle, Leaf } from "lucide-react";
+import { TrendingDown, Trash2, Target, AlertTriangle, Leaf } from "lucide-react";
 import Link from "next/link";
 
 export default function WastePage() {
@@ -12,10 +11,10 @@ export default function WastePage() {
         {/* Header Section */}
         <section>
           <div className="flex items-center space-x-4">
-            <Link href="/home">
-              <Button variant="ghost" size="sm" className="p-2">
-                <ArrowLeft className="w-5 h-5" />
-              </Button>
+            <Link href="/home" className="inline-flex items-center justify-center w-10 h-10 bg-gray-300/40 backdrop-blur-sm border border-gray-400/30 rounded-md text-white hover:bg-white/30 transition-colors">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
             </Link>
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Tracking Sisa Makanan</h1>
@@ -27,21 +26,18 @@ export default function WastePage() {
         {/* Waste Reduction Summary Section */}
         <section>
           <Card className="border-0 bg-gradient-to-br from-primary via-primary/90 to-accent text-white">
-            <CardContent className="p-6">
+            <CardContent className="p-6 py-2">
               <div className="flex items-center justify-between">
                 <div>
+                <Badge className="bg-white/20 text-white border-white/30 mb-2">
+                    Excellent!
+                  </Badge>
                   <div className="flex items-center space-x-2 mb-2">
-                    <Leaf className="w-6 h-6" />
+                    <Leaf className="w-4 h-4" />
                     <span className="text-sm font-medium">Pengurangan Waste</span>
                   </div>
                   <p className="text-3xl font-bold mb-1">-8%</p>
                   <p className="text-white/80">Dari minggu lalu</p>
-                </div>
-                <div className="text-right">
-                  <Badge className="bg-white/20 text-white border-white/30 mb-2">
-                    Excellent!
-                  </Badge>
-                  <p className="text-white/80 text-sm">Target tercapai</p>
                 </div>
               </div>
             </CardContent>

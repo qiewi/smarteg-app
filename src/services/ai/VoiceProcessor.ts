@@ -1,3 +1,5 @@
+import { GenAIService } from './GenAIService';
+
 export interface VoiceCommand {
   text: string;
   confidence: number;
@@ -86,16 +88,25 @@ export class VoiceProcessor {
       this.isListening = true;
 
       this.recognition.onresult = (event: any) => {
-        const result = event.results[event.results.length - 1];
-        if (result.isFinal) {
-          const command: VoiceCommand = {
-            text: result[0].transcript,
-            confidence: result[0].confidence,
-            timestamp: new Date(),
-            language: this.settings.language
-          };
-          this.isListening = false;
-          resolve(command);
+        let interimTranscript = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            const finalTranscript = event.results[i][0].transcript;
+            console.log(`✅ Final Transcript: "${finalTranscript}"`);
+            const command: VoiceCommand = {
+              text: finalTranscript,
+              confidence: event.results[i][0].confidence,
+              timestamp: new Date(),
+              language: this.settings.language
+            };
+            this.isListening = false;
+            resolve(command);
+          } else {
+            interimTranscript += event.results[i][0].transcript;
+          }
+        }
+        if (interimTranscript) {
+            console.log(`🎤 Interim Transcript: "${interimTranscript}"`);
         }
       };
 
@@ -148,9 +159,24 @@ export class VoiceProcessor {
   }
 
   /**
+   * Process voice command and extract intent using GenAI
+   */
+  static async processVoiceCommand(transcript: string, getNewToken: () => Promise<{ name: string }>): Promise<any> {
+    try {
+      const command = await GenAIService.parseCommand(transcript, getNewToken);
+      console.log("✅ Parsed Command:", command);
+      return command;
+    } catch (error) {
+      console.error("❌ Failed to process command with GenAI:", error);
+      // Fallback to simpler local processing if GenAI fails
+      return this.localProcessVoiceCommand(transcript);
+    }
+  }
+
+  /**
    * Process voice command and extract intent
    */
-  static processVoiceCommand(text: string): any {
+  static localProcessVoiceCommand(text: string): any {
     const lowercaseText = text.toLowerCase();
     
     // Stock recording patterns
@@ -176,7 +202,8 @@ export class VoiceProcessor {
     return {
       type: 'unknown',
       text: text,
-      confidence: 0.1
+      confidence: 0.1,
+      payload: { originalTranscript: text }
     };
   }
 

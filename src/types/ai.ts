@@ -156,6 +156,7 @@ export interface UseVoiceReturn {
   stopListening: () => void;
   speak: (text: string, options?: Partial<VoiceSettings>) => Promise<void>;
   isSpeaking: boolean;
+  clearTranscript: () => void;
 }
 
 export interface UseWebSocketReturn {
