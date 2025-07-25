@@ -22,7 +22,7 @@ export class VoiceProcessor {
   private static isListening: boolean = false;
   private static settings: VoiceSettings = {
     language: 'id-ID', // Indonesian by default
-    continuous: false,
+    continuous: true,  // Changed to true to keep listening
     interimResults: true,
     volume: 1.0,
     rate: 1.0,
@@ -30,9 +30,23 @@ export class VoiceProcessor {
   };
 
   /**
+   * Initialize both Speech Recognition and Speech Synthesis
+   */
+  static async initialize(): Promise<{ recognition: any; synthesis: SpeechSynthesis | null }> {
+    try {
+      await this.initializeSpeechRecognition();
+      this.initializeSpeechSynthesis();
+      return { recognition: this.recognition, synthesis: this.synthesis };
+    } catch (error) {
+      console.error("Failed to initialize voice processor:", error);
+      throw error;
+    }
+  }
+
+  /**
    * Initialize Speech Recognition (STT)
    */
-  static initializeSpeechRecognition(): Promise<boolean> {
+  private static async initializeSpeechRecognition(): Promise<void> {
     return new Promise((resolve, reject) => {
       if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
         reject(new Error('Speech Recognition not supported in this browser'));
@@ -44,12 +58,14 @@ export class VoiceProcessor {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         this.recognition = new SpeechRecognition();
         
+        // Configure recognition settings
         this.recognition.lang = this.settings.language;
         this.recognition.continuous = this.settings.continuous;
         this.recognition.interimResults = this.settings.interimResults;
+        this.recognition.maxAlternatives = 1;
         
         console.log('Speech Recognition initialized successfully');
-        resolve(true);
+        resolve();
       } catch (error) {
         reject(error);
       }
@@ -59,7 +75,7 @@ export class VoiceProcessor {
   /**
    * Initialize Speech Synthesis (TTS)
    */
-  static initializeSpeechSynthesis(): boolean {
+  private static initializeSpeechSynthesis(): boolean {
     if (!('speechSynthesis' in window)) {
       console.error('Speech Synthesis not supported in this browser');
       return false;
@@ -73,62 +89,94 @@ export class VoiceProcessor {
   /**
    * Start listening for voice input
    */
-  static startListening(): Promise<VoiceCommand> {
+  static startListening(
+    recognition: any,
+    onInterimResult: (transcript: string) => void,
+    onFinalResult: (command: VoiceCommand) => void
+  ): Promise<void> {
     return new Promise((resolve, reject) => {
-      if (!this.recognition) {
+      if (!recognition) {
         reject(new Error('Speech Recognition not initialized'));
         return;
       }
 
       if (this.isListening) {
-        reject(new Error('Already listening'));
-        return;
+        recognition.stop();
       }
 
       this.isListening = true;
+      let finalTranscriptBuffer = '';
 
-      this.recognition.onresult = (event: any) => {
+      recognition.onstart = () => {
+        console.log('🎤 Recognition started');
+      };
+
+      recognition.onresult = (event: any) => {
         let interimTranscript = '';
+        let isFinal = false;
+
         for (let i = event.resultIndex; i < event.results.length; ++i) {
+          const transcript = event.results[i][0].transcript;
           if (event.results[i].isFinal) {
-            const finalTranscript = event.results[i][0].transcript;
-            console.log(`✅ Final Transcript: "${finalTranscript}"`);
-            const command: VoiceCommand = {
-              text: finalTranscript,
-              confidence: event.results[i][0].confidence,
-              timestamp: new Date(),
-              language: this.settings.language
-            };
-            this.isListening = false;
-            resolve(command);
+            finalTranscriptBuffer += transcript + ' ';
+            isFinal = true;
           } else {
-            interimTranscript += event.results[i][0].transcript;
+            interimTranscript += transcript;
           }
         }
+
+        // Always send interim results
         if (interimTranscript) {
-            console.log(`🎤 Interim Transcript: "${interimTranscript}"`);
+          console.log(`🎤 Interim transcript: "${interimTranscript}"`);
+          onInterimResult(interimTranscript);
+        }
+
+        // Send final results when we have them
+        if (isFinal && finalTranscriptBuffer.trim()) {
+          console.log(`✅ Final transcript: "${finalTranscriptBuffer}"`);
+          const command: VoiceCommand = {
+            text: finalTranscriptBuffer.trim(),
+            confidence: event.results[event.results.length - 1][0].confidence,
+            timestamp: new Date(),
+            language: this.settings.language
+          };
+          onFinalResult(command);
+          finalTranscriptBuffer = ''; // Reset the buffer
         }
       };
 
-      this.recognition.onerror = (event: any) => {
+      recognition.onerror = (event: any) => {
+        console.error('🔴 Recognition error:', event.error);
         this.isListening = false;
         reject(new Error(`Speech Recognition error: ${event.error}`));
       };
 
-      this.recognition.onend = () => {
+      recognition.onend = () => {
+        console.log('🛑 Recognition ended');
+        // If we have any remaining final transcript, send it
+        if (finalTranscriptBuffer.trim()) {
+          const command: VoiceCommand = {
+            text: finalTranscriptBuffer.trim(),
+            confidence: 1.0, // We don't have actual confidence here
+            timestamp: new Date(),
+            language: this.settings.language
+          };
+          onFinalResult(command);
+        }
         this.isListening = false;
+        resolve();
       };
 
-      this.recognition.start();
+      recognition.start();
     });
   }
 
   /**
    * Stop listening
    */
-  static stopListening(): void {
-    if (this.recognition && this.isListening) {
-      this.recognition.stop();
+  static stopListening(recognition: any): void {
+    if (recognition && this.isListening) {
+      recognition.stop();
       this.isListening = false;
     }
   }

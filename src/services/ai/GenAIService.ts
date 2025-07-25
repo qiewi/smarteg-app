@@ -11,8 +11,12 @@
  * - Real-time Audio Streaming Guide: https://medium.com/google-cloud/real-time-audio-to-audio-streaming-with-googles-multimodal-live-api-73b54277b022
  */
 import { GoogleGenAI, Modality } from "@google/genai";
-import { createCommandParserPrompt, createPredictionPrompt } from '@/lib/prompt';
-import * as api from '@/lib/api'; 
+import {
+  createCommandParserPrompt,
+  createPredictionPrompt,
+  createDailyReportPrompt
+} from '@/lib/prompt';
+import * as api from '@/lib/api';
 
 // Recommended to use the latest models for live and batch processing
 const LIVE_MODEL_NAME = 'gemini-2.0-flash-live-001';
@@ -30,7 +34,7 @@ export class GenAIService {
     if (!freshToken?.name) {
       throw new Error("Could not get a valid token for processing.");
     }
-    
+
     // Create a new instance for each call with the fresh token
     const genAI = new GoogleGenAI({ apiKey: freshToken.name, httpOptions: { apiVersion: 'v1alpha' } });
 
@@ -85,10 +89,14 @@ export class GenAIService {
       { "name": "rendang", "price": 25000 },
       { "name": "nasi telur", "price": 10000}
     ];
-    
-    const prompt = createCommandParserPrompt(transcript, dummy_menu);
+
+    const menu_list = await api.menuAPI.getMenu();
+
+    console.log("Menu_list", menu_list.data);
+
+    const prompt = createCommandParserPrompt(transcript, menu_list.data.menu.length >= 1 || dummy_menu);
     const responseText = await this.getLiveResponse(prompt, getNewToken);
-    
+
     // Clean up the response to get a valid JSON string
     const jsonString = responseText.replace(/```json|```/g, '').trim();
     return JSON.parse(jsonString);
@@ -103,7 +111,26 @@ export class GenAIService {
     const historicalData = await api.salesAPI.getMonthlySales();
     const prompt = createPredictionPrompt(historicalData);
     const responseText = await this.getLiveResponse(prompt, getNewToken);
-    
+
+    const jsonString = responseText.replace(/```json|```/g, '').trim();
+    return JSON.parse(jsonString);
+  }
+
+  /**
+   * Generates a daily report by fetching sales and stock data and using the AI model.
+   * @param getNewToken A function to get a fresh authentication token.
+   * @returns A promise that resolves to the report data, containing text and LaTeX formats.
+   */
+  static async generateDailyReport(getNewToken: () => Promise<{ name: string }>): Promise<any> {
+    // Fetch the daily data from your backend
+    const [dailySales, dailyStock] = await Promise.all([
+      api.salesAPI.getDailySales(),
+      api.stockAPI.getDailyStock()
+    ]);
+
+    const prompt = createDailyReportPrompt(dailySales, dailyStock);
+    const responseText = await this.getLiveResponse(prompt, getNewToken);
+
     const jsonString = responseText.replace(/```json|```/g, '').trim();
     return JSON.parse(jsonString);
   }
