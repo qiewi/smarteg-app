@@ -2,16 +2,35 @@
 
 import React, { useState, useEffect } from 'react';
 import { geminiAPI } from '../../lib/api';
-import { AIContextProvider, useAIEngine, useVoiceController } from '../../context/AIContextProvider';
+import { AIContextProvider, useAIEngine, useVoiceCommands } from '../../context/AIContextProvider';
+import { useReport } from '../../hooks/useAI';
 import type { PredictionData } from '../../types/ai';
+
+const getNewToken = async () => {
+  const response = await geminiAPI.getToken();
+  return (response as any).data;
+};
 
 // Test component that uses the AI context
 function AITestComponent() {
   const { voice, webSocket, prediction, isInitialized } = useAIEngine();
-  const { startListening, stopListening, isListening, isProcessing, transcript, lastCommand, error } = useVoiceController();
+  const { startListening, stopListening, isListening, isProcessing, transcript, lastCommand, error } = useVoiceCommands();
 
   const [predictionResult, setPredictionResult] = useState<PredictionData[] | null>(null);
   const [predictionLoading, setPredictionLoading] = useState(false);
+  
+  const { reportData, isLoading: isReportLoading, error: reportError, generateReport } = useReport(getNewToken);
+  const [lastProcessedCommand, setLastProcessedCommand] = useState<any>(null);
+
+
+  // This is now handled by the useVoiceCommands hook
+  // useEffect(() => {
+  //   if (lastCommand && lastCommand?.timestamp !== lastProcessedCommand?.timestamp && lastCommand?.action === 'DAILY_REPORT') {
+  //     console.log('ℹ️ DAILY_REPORT action detected via voice, generating report...');
+  //     generateReport();
+  //     setLastProcessedCommand(lastCommand);
+  //   }
+  // }, [lastCommand, generateReport, lastProcessedCommand]);
 
   const handleStartInteraction = async () => {
     console.log('🎤 Starting voice interaction...');
@@ -50,6 +69,26 @@ function AITestComponent() {
     }
   };
   
+  const handleDownloadPdf = () => {
+    if (reportData?.html) {
+      console.log('ℹ️ Preparing PDF download...');
+      const element = document.createElement('div');
+      element.innerHTML = reportData.html;
+      
+      // Use html2pdf.js to generate and download the PDF
+      // @ts-ignore
+      html2pdf(element, {
+        margin:       1,
+        filename:     'daily_report.pdf',
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2 },
+        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+      }).then(() => {
+        console.log('✅ PDF download initiated.');
+      });
+    }
+  };
+
   // Update local state when prediction data changes
   useEffect(() => {
     if (prediction.predictions) {
@@ -193,6 +232,39 @@ function AITestComponent() {
         )}
       </div>
 
+      {/* Daily Report Section */}
+      <div className="bg-white border rounded-lg p-6">
+        <h2 className="text-xl font-semibold mb-4">Daily Report</h2>
+        
+        <button
+          onClick={generateReport}
+          disabled={isReportLoading || !isInitialized}
+          className="px-6 py-2 bg-purple-500 text-white rounded disabled:bg-gray-400 disabled:cursor-not-allowed"
+        >
+          {isReportLoading ? 'Generating Report...' : 'Generate Daily Report'}
+        </button>
+
+        {reportData && (
+          <div className="mt-4 bg-gray-50 p-4 rounded border">
+            <h3 className="font-medium mb-2">Report Text:</h3>
+            <pre className="text-sm text-gray-700 whitespace-pre-wrap">
+              {reportData.text}
+            </pre>
+            <button
+              onClick={handleDownloadPdf}
+              className="mt-4 px-4 py-2 bg-green-600 text-white rounded"
+            >
+              Download PDF
+            </button>
+          </div>
+        )}
+        {reportError && (
+          <div className="mt-4 text-red-500">
+            Error generating report: {reportError}
+          </div>
+        )}
+      </div>
+
       {/* Error Display */}
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
@@ -229,7 +301,7 @@ export default function TestAIPage() {
   // Function to get a fresh token (for single-use ephemeral tokens)
   const getNewToken = async (): Promise<{ name: string }> => {
     try {
-        const response = await geminiAPI.getToken();
+    const response = await geminiAPI.getToken();
         return (response as any).data;
     } catch (error) {
         console.error("Failed to get new token:", error);

@@ -18,6 +18,12 @@ export const API_CONFIG = {
     // Gemini Service endpoints
     GEMINI_TOKEN: '/service/gemini/token',
     
+    // Menu Management endpoints
+    MENU_READ: '/service/menu/read',
+    MENU_CREATE: '/service/menu/create',
+    MENU_UPDATE: '/service/menu/update',
+    MENU_REMOVE: '/service/menu/remove',
+    
     // Stock Management endpoints
     STOCK_DAILY: '/service/stock/daily',
     STOCK_DAILY_DATE: '/service/stock/daily', // + /{date}

@@ -1,12 +1,13 @@
 'use client';
 
 import React, { createContext, useContext, ReactNode } from 'react';
-import { useAI, useVoiceCommands } from '../hooks/useAI';
-import type { UseAIReturn } from '../types/ai';
+import { useAI } from '../hooks/useAI';
+import { useVoiceCommands as useVoiceCommandsHook } from '../hooks/useAI';
+import type { UseAIReturn, VoiceCommandsContextType } from '../types/ai';
 
 // Create the context
 const AIContext = createContext<UseAIReturn | null>(null);
-const VoiceCommandsContext = createContext<any>(null);
+const VoiceCommandsContext = createContext<VoiceCommandsContextType | null>(null);
 
 interface AIContextProviderProps {
   children: ReactNode;
@@ -16,7 +17,7 @@ interface AIContextProviderProps {
 // Provider component that encapsulates the AI logic
 export function AIContextProvider({ children, getNewToken }: AIContextProviderProps) {
   const ai_logic = useAI();
-  const voice_commands = useVoiceCommands(getNewToken);
+  const voice_commands = useVoiceCommandsHook(getNewToken);
 
   return (
     <AIContext.Provider value={ai_logic}>
@@ -37,10 +38,10 @@ export function useAIEngine(): UseAIReturn {
 }
 
 // Custom hook to access the voice command processing functions
-export function useVoiceController() {
+export function useVoiceCommands(): VoiceCommandsContextType {
   const context = useContext(VoiceCommandsContext);
   if (!context) {
-    throw new Error('useVoiceController must be used within an AIContextProvider');
+    throw new Error('useVoiceCommands must be used within an AIContextProvider');
   }
   return context;
 } 

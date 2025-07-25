@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { VoiceProcessor } from '@/services/ai/VoiceProcessor';
 import { SupplyPredictionService } from '@/services/ai/SupplyPrediction';
+import { GenAIService } from '@/services/ai/GenAIService';
 import { webSocketService } from '@/services/websocket/WebSocketService';
 import * as api from '@/lib/api';
 import type { 
@@ -13,7 +14,8 @@ import type {
   VoiceSettings,
   WebSocketMessage,
   PredictionData,
-  HistoricalSalesData
+  HistoricalSalesData,
+  VoiceCommand
 } from '@/types/ai';
 
 /**
@@ -23,22 +25,25 @@ export function useVoice(): UseVoiceReturn {
   const [isListening, setIsListening] = useState(false);
   const [isSupported, setIsSupported] = useState(false);
   const [transcript, setTranscript] = useState('');
+  const [finalTranscript, setFinalTranscript] = useState('');
   const [confidence, setConfidence] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const recognitionRef = useRef<any>(null);
 
   // Function to clear the transcript
   const clearTranscript = useCallback(() => {
     setTranscript('');
+    setFinalTranscript('');
   }, []);
 
   // Initialize voice services on mount
   useEffect(() => {
     const initVoice = async () => {
       try {
-        await VoiceProcessor.initializeSpeechRecognition();
-        const ttsSupported = VoiceProcessor.initializeSpeechSynthesis();
-        setIsSupported(ttsSupported);
+        const { recognition, synthesis } = await VoiceProcessor.initialize();
+        recognitionRef.current = recognition;
+        setIsSupported(!!synthesis);
         setError(null);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Voice not supported');
@@ -47,38 +52,51 @@ export function useVoice(): UseVoiceReturn {
     };
 
     initVoice();
+
+    return () => {
+      if (recognitionRef.current) {
+        VoiceProcessor.stopListening(recognitionRef.current);
+      }
+    };
   }, []);
 
   const startListening = useCallback(async () => {
-    if (!isSupported) {
-      setError('Voice recognition not supported');
+    if (!recognitionRef.current) {
+      setError('Voice recognition not initialized');
       return;
     }
 
     try {
       setIsListening(true);
       setError(null);
-      const command = await VoiceProcessor.startListening();
-      setTranscript(command.text);
-      setConfidence(command.confidence);
-      setIsListening(false);
+      setTranscript('');
+      setFinalTranscript('');
+      
+      await VoiceProcessor.startListening(
+        recognitionRef.current,
+        (interim: string) => {
+          setTranscript(interim);
+        },
+        (final: VoiceCommand) => {
+          setFinalTranscript(final.text);
+          setConfidence(final.confidence);
+          setIsListening(false);
+        }
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Voice recognition failed');
       setIsListening(false);
     }
-  }, [isSupported]);
+  }, []);
 
   const stopListening = useCallback(() => {
-    VoiceProcessor.stopListening();
-    setIsListening(false);
+    if (recognitionRef.current) {
+      VoiceProcessor.stopListening(recognitionRef.current);
+      setIsListening(false);
+    }
   }, []);
 
   const speak = useCallback(async (text: string, options?: Partial<VoiceSettings>) => {
-    if (!isSupported) {
-      setError('Text-to-speech not supported');
-      return;
-    }
-
     try {
       setIsSpeaking(true);
       setError(null);
@@ -88,12 +106,13 @@ export function useVoice(): UseVoiceReturn {
       setError(err instanceof Error ? err.message : 'Text-to-speech failed');
       setIsSpeaking(false);
     }
-  }, [isSupported]);
+  }, []);
 
   return {
     isListening,
     isSupported,
     transcript,
+    finalTranscript,
     confidence,
     error,
     startListening,
@@ -259,24 +278,75 @@ export function useAI(): UseAIReturn {
  * Hook for processing voice commands
  */
 export function useVoiceCommands(getNewToken: () => Promise<{ name: string }>) {
-  const { startListening, stopListening, speak, transcript, isListening, error, clearTranscript } = useVoice();
+  const { speak, error } = useVoice();
   
   const [lastCommand, setLastCommand] = useState<any>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [transcript, setTranscript] = useState("");
+  const [finalTranscript, setFinalTranscript] = useState("");
+  const recognitionRef = useRef<any>(null);
 
-  const processCommand = useCallback(async () => {
-    if (!transcript) return;
+  useEffect(() => {
+    const init = async () => {
+      try {
+        const { recognition } = await VoiceProcessor.initialize();
+        recognitionRef.current = recognition;
+      } catch (e) {
+        console.error("Failed to initialize recognition in useVoiceCommands:", e);
+      }
+    };
+    init();
+
+    return () => {
+      if (recognitionRef.current) {
+        VoiceProcessor.stopListening(recognitionRef.current);
+      }
+    };
+  }, []);
+
+  // Generate daily report function
+  const generateReport = useCallback(async () => {
+    try {
+      const report = await GenAIService.generateDailyReport(getNewToken);
+      console.log('Daily report generated:', report);
+      // The report is generated and logged. You can extend this to:
+      // - Save to local state
+      // - Show in UI
+      // - Send via WebSocket
+      // - Store in database via API call
+    } catch (err) {
+      console.error('Failed to generate report:', err);
+    }
+  }, [getNewToken]);
+
+  // Generate predictions function
+  const generatePredictions = useCallback(async () => {
+    try {
+      const predictions = await SupplyPredictionService.predictWithAI(getNewToken);
+      console.log('Predictions generated:', predictions);
+      // The predictions are generated and logged. You can extend this to:
+      // - Save to local state
+      // - Show in UI
+      // - Send via WebSocket
+      // - Store in database via API call
+    } catch (err) {
+      console.error('Failed to generate predictions:', err);
+    }
+  }, [getNewToken]);
+
+  const processCommand = useCallback(async (commandText: string) => {
+    if (!commandText) return;
 
     setIsProcessing(true);
     let feedbackMessage = "Maaf, terjadi kesalahan.";
     
     try {
-      const command = await VoiceProcessor.processVoiceCommand(transcript, getNewToken);
-      setLastCommand(command);
+      const command = await VoiceProcessor.processVoiceCommand(commandText, getNewToken);
+      setLastCommand({ ...command, timestamp: new Date().getTime() });
 
       switch (command.action) {
         case 'UPDATE_STOCK':
-          // TODO: update list in UI, then send to backend after user confirms
           await api.stockAPI.addStock(command.payload);
           const stockNames = command.payload.map((item: any) => item.name).join(', ');
           feedbackMessage = `Oke, stok ${stockNames} sudah diperbarui.`;
@@ -286,8 +356,15 @@ export function useVoiceCommands(getNewToken: () => Promise<{ name: string }>) {
           const itemNames = command.payload.items.map((i: any) => `${i.counts} ${i.name}`).join(', ');
           feedbackMessage = `Sip, pesanan ${itemNames} sudah dicatat.`;
           break;
+        case 'DAILY_REPORT':
+          feedbackMessage = "Oke, laporan harian sedang dibuat. Mohon tunggu sebentar.";
+          generateReport();
+          break;
+        case 'PREDICTION':
+          feedbackMessage = "Oke, prediksi stok sedang dibuat. Mohon tunggu sebentar.";
+          generatePredictions();
+          break;
         case 'SOCIAL_POST':
-          // You would have a corresponding API call here, e.g., api.social.createPost(command.payload)
           feedbackMessage = `Oke, saya akan umumkan bahwa ${command.payload.name} sekarang ${command.payload.status === 'ready' ? 'siap' : 'habis'}.`;
           break;
         case 'INVALID_MENU':
@@ -303,24 +380,89 @@ export function useVoiceCommands(getNewToken: () => Promise<{ name: string }>) {
     } finally {
       await speak(feedbackMessage);
       setIsProcessing(false);
-      clearTranscript(); // Clear the transcript to allow for the next command
+      setTranscript("");
+      setFinalTranscript("");
     }
-  }, [transcript, speak, getNewToken, clearTranscript]);
+  }, [getNewToken, speak]);
 
-  // Auto-process when transcript changes
   useEffect(() => {
-    if (transcript && !isListening && !isProcessing) {
-      processCommand();
+    if (finalTranscript && !isProcessing) {
+      processCommand(finalTranscript);
     }
-  }, [transcript, isListening, isProcessing, processCommand]);
+  }, [finalTranscript, isProcessing, processCommand]);
+
+  const startListening = useCallback(async () => {
+    if (!recognitionRef.current) {
+      console.error('Recognition not initialized');
+      return;
+    }
+
+    try {
+      setIsListening(true);
+      setTranscript("");
+      setFinalTranscript("");
+      
+      await VoiceProcessor.startListening(
+        recognitionRef.current,
+        (interim: string) => {
+          console.log('Interim transcript:', interim);
+          setTranscript(interim);
+        },
+        (final: VoiceCommand) => {
+          console.log('Final transcript:', final.text);
+          setFinalTranscript(final.text);
+          setIsListening(false);
+        }
+      );
+    } catch (e) {
+      console.error("Error during listening:", e);
+      setIsListening(false);
+    }
+  }, []);
+
+  const stopListening = useCallback(() => {
+    if (recognitionRef.current) {
+      VoiceProcessor.stopListening(recognitionRef.current);
+    }
+    setIsListening(false);
+  }, []);
 
   return {
     startListening,
     stopListening,
     isListening,
     isProcessing,
-    transcript,
+    transcript: finalTranscript || transcript,
     lastCommand,
-    error
+    error,
+  };
+} 
+
+/**
+ * Hook for generating daily reports
+ */
+export function useReport(getNewToken: () => Promise<{ name: string }>) {
+  const [reportData, setReportData] = useState<{ text: string; html: string } | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const generateReport = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const report = await GenAIService.generateDailyReport(getNewToken);
+      setReportData(report);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to generate report');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [getNewToken]);
+
+  return {
+    reportData,
+    isLoading,
+    error,
+    generateReport,
   };
 } 

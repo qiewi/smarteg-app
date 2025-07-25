@@ -150,6 +150,7 @@ export interface UseVoiceReturn {
   isListening: boolean;
   isSupported: boolean;
   transcript: string;
+  finalTranscript: string;
   confidence: number;
   error: string | null;
   startListening: () => Promise<void>;
@@ -157,6 +158,16 @@ export interface UseVoiceReturn {
   speak: (text: string, options?: Partial<VoiceSettings>) => Promise<void>;
   isSpeaking: boolean;
   clearTranscript: () => void;
+}
+
+export interface VoiceCommandsContextType {
+  startListening: () => Promise<void>;
+  stopListening: () => void;
+  isListening: boolean;
+  isProcessing: boolean;
+  transcript: string;
+  lastCommand: any;
+  error: string | null;
 }
 
 export interface UseWebSocketReturn {
