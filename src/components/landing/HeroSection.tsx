@@ -9,28 +9,6 @@ import { ZapIcon, ArrowUpRight } from "lucide-react";
 import Image from "next/image";
 
 const HeroSection = () => {
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-
-  useEffect(() => {
-    const handler = (e: any) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-    };
-    
-    window.addEventListener('beforeinstallprompt', handler);
-    return () => window.removeEventListener('beforeinstallprompt', handler);
-  }, []);
-
-  const handleInstallClick = async () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === 'accepted') {
-        setDeferredPrompt(null);
-      }
-    }
-  };
-
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background Image */}
@@ -59,7 +37,7 @@ const HeroSection = () => {
         </div>
         
         {/* SDG 8 - Decent Work - Kanan atas */}
-        <div className="absolute top-16 right-12 w-28 h-28 opacity-35 blur-md rounded-sm overflow-hidden">
+        <div className="absolute top-16 right-12 w-28 h-28 opacity-35 blur-sm rounded-sm overflow-hidden">
           <Image
             src="/sdg/E_WEB_08.png"
             alt="SDG 8 - Decent Work"

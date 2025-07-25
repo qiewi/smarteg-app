@@ -2,9 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { HelpCircle, ArrowUpRight } from 'lucide-react';
+import { HelpCircle } from 'lucide-react';
 import { PlusIcon } from "lucide-react";
 import { Accordion as AccordionPrimitive } from "radix-ui";
 import {
@@ -12,7 +10,6 @@ import {
   AccordionContent,
   AccordionItem,
 } from "@/components/ui/accordion";
-import Link from 'next/link';
 
 const faqData = [
   {

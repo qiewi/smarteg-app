@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import { Trash2, Brain, Mic, Package, Banknote } from "lucide-react";
+import Image from "next/image";
 
 const features = [
   {
@@ -43,56 +44,56 @@ const features = [
   }
 ];
 
-const featureButtons = [
-  "Design workshops",
-  "Workshops", 
-  "Trend reports",
-  "Asset library",
-  "Rollover hours",
-  "Premium designers",
-  "Multilingual support"
-];
-
 const FeatureSection = () => {
   const renderVisual = (type: string) => {
     switch (type) {
       case "waste-chart":
         return (
-          <img 
+          <Image 
             src="/features/Pengelolaan Limbah Makanan Sisa.png" 
             alt="Pengelolaan Limbah Makanan Sisa"
+            width={500}
+            height={160}
             className="w-full h-40 object-cover rounded-lg"
           />
         );
       case "ai-prediction":
         return (
-          <img 
+          <Image 
             src="/features/Prediksi Kebutuhan Harian Berbasis AI.png" 
             alt="Prediksi Kebutuhan Harian Berbasis AI"
+            width={500}
+            height={160}
             className="w-full h-40 object-cover rounded-lg"
           />
         );
       case "voice-sales":
         return (
-          <img 
+          <Image 
             src="/features/Pencatatan Penjualan Lewat Suara.png" 
             alt="Pencatatan Penjualan Lewat Suara"
+            width={500}
+            height={160}
             className="w-full h-40 object-cover rounded-lg"
           />
         );
       case "stock-tracking":
         return (
-          <img 
+          <Image 
             src="/features/Pencatatan Stok Otomatis.png" 
             alt="Pencatatan Stok Otomatis"
+            width={500}
+            height={192}
             className="w-full h-48 object-cover rounded-lg"
           />
         );
       case "social-promo":
         return (
-          <img 
+          <Image 
             src="/features/Notifikasi Menu Ready dan Promosi Real-Time.png" 
             alt="Notifikasi Menu Ready dan Promosi Real-Time"
+            width={500}
+            height={192}
             className="w-full h-48 object-cover rounded-lg"
           />
         );

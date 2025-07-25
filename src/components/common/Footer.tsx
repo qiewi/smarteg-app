@@ -1,9 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Github, Instagram, Linkedin, Youtube, Mail, ArrowUp } from "lucide-react";
+import { Github, Instagram, Linkedin, Youtube, ArrowUp } from "lucide-react";
+import Image from "next/image";
 
 const Footer = () => {
   return (
@@ -15,9 +14,11 @@ const Footer = () => {
     >
       {/* Large icon background */}
       <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-96 h-96 opacity-10">
-        <img 
+        <Image 
           src="/just-icon.png" 
           alt="Smarteg Icon" 
+          width={384}
+          height={384}
           className="w-full h-full object-contain"
         />
       </div>
@@ -75,9 +76,11 @@ const Footer = () => {
         <div className="border-t border-gray-200 pt-8 flex flex-col md:flex-row justify-between items-center">
           {/* Logo */}
           <div className="mb-4 md:mb-0">
-            <img 
+            <Image 
               src="/logo-white.png" 
               alt="Smarteg Logo" 
+              width={128}
+              height={32}
               className="h-8 w-auto"
             />
           </div>

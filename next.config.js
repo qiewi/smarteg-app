@@ -60,9 +60,18 @@ const withPWA = require('next-pwa')({
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'randomuser.me',
+        pathname: '/**',
+      },
+    ],
+  },
   turbopack: {
     // Turbopack configuration (moved from experimental)
-  }
+  },
 }
 
 module.exports = withPWA(nextConfig) 
