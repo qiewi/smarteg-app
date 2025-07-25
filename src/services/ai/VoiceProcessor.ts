@@ -88,16 +88,25 @@ export class VoiceProcessor {
       this.isListening = true;
 
       this.recognition.onresult = (event: any) => {
-        const result = event.results[event.results.length - 1];
-        if (result.isFinal) {
-          const command: VoiceCommand = {
-            text: result[0].transcript,
-            confidence: result[0].confidence,
-            timestamp: new Date(),
-            language: this.settings.language
-          };
-          this.isListening = false;
-          resolve(command);
+        let interimTranscript = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            const finalTranscript = event.results[i][0].transcript;
+            console.log(`✅ Final Transcript: "${finalTranscript}"`);
+            const command: VoiceCommand = {
+              text: finalTranscript,
+              confidence: event.results[i][0].confidence,
+              timestamp: new Date(),
+              language: this.settings.language
+            };
+            this.isListening = false;
+            resolve(command);
+          } else {
+            interimTranscript += event.results[i][0].transcript;
+          }
+        }
+        if (interimTranscript) {
+            console.log(`🎤 Interim Transcript: "${interimTranscript}"`);
         }
       };
 

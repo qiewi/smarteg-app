@@ -27,6 +27,11 @@ export function useVoice(): UseVoiceReturn {
   const [error, setError] = useState<string | null>(null);
   const [isSpeaking, setIsSpeaking] = useState(false);
 
+  // Function to clear the transcript
+  const clearTranscript = useCallback(() => {
+    setTranscript('');
+  }, []);
+
   // Initialize voice services on mount
   useEffect(() => {
     const initVoice = async () => {
@@ -94,7 +99,8 @@ export function useVoice(): UseVoiceReturn {
     startListening,
     stopListening,
     speak,
-    isSpeaking
+    isSpeaking,
+    clearTranscript
   };
 }
 
@@ -221,8 +227,12 @@ export function useAI(): UseAIReturn {
   const initializeAI = useCallback(async () => {
     try {
       // Initialize voice services (already done in useVoice)
-      // Connect to WebSocket
-      await webSocket.connect();
+      // WebSocket connection is optional - don't block initialization if it fails
+      try {
+        await webSocket.connect();
+      } catch (err) {
+        console.warn('WebSocket connection failed, continuing without it:', err);
+      }
       
       setIsInitialized(true);
     } catch (err) {
@@ -249,7 +259,7 @@ export function useAI(): UseAIReturn {
  * Hook for processing voice commands
  */
 export function useVoiceCommands(getNewToken: () => Promise<{ name: string }>) {
-  const { startListening, stopListening, speak, transcript, isListening, error } = useVoice();
+  const { startListening, stopListening, speak, transcript, isListening, error, clearTranscript } = useVoice();
   
   const [lastCommand, setLastCommand] = useState<any>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -266,6 +276,7 @@ export function useVoiceCommands(getNewToken: () => Promise<{ name: string }>) {
 
       switch (command.action) {
         case 'UPDATE_STOCK':
+          // TODO: update list in UI, then send to backend after user confirms
           await api.stockAPI.addStock(command.payload);
           const stockNames = command.payload.map((item: any) => item.name).join(', ');
           feedbackMessage = `Oke, stok ${stockNames} sudah diperbarui.`;
@@ -292,8 +303,9 @@ export function useVoiceCommands(getNewToken: () => Promise<{ name: string }>) {
     } finally {
       await speak(feedbackMessage);
       setIsProcessing(false);
+      clearTranscript(); // Clear the transcript to allow for the next command
     }
-  }, [transcript, speak, getNewToken]);
+  }, [transcript, speak, getNewToken, clearTranscript]);
 
   // Auto-process when transcript changes
   useEffect(() => {
