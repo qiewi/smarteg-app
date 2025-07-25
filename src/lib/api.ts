@@ -14,6 +14,9 @@ class ApiClient {
 
   // Get authorization header
   private getAuthHeader(): Record<string, string> {
+    if (typeof window === 'undefined') {
+      return {}; // Return empty headers on server-side
+    }
     const token = localStorage.getItem('auth_token');
     return token ? { Authorization: `Bearer ${token}` } : {};
   }
@@ -141,6 +144,24 @@ export const salesAPI = {
   // Record sales (sell stock items)
   recordSales: (salesData: any) =>
     apiClient.put(API_CONFIG.ENDPOINTS.SALES_ADD, salesData),
+};
+
+export const menuAPI = {
+  // Get menu items
+  getMenu: () =>
+    apiClient.get(API_CONFIG.ENDPOINTS.MENU_READ),
+  
+  // Add new menu item
+  addMenuItem: (menuData: any) =>
+    apiClient.post('/menu', menuData),
+  
+  // Update menu item
+  updateMenuItem: (id: string, menuData: any) =>
+    apiClient.put(`/menu/${id}`, menuData),
+  
+  // Delete menu item
+  deleteMenuItem: (id: string) =>
+    apiClient.delete(`/menu/${id}`),
 }; 
 
 export interface SalesData {
@@ -173,6 +194,9 @@ export interface MonthlySalesResponse {
 
 // Helper function to get auth headers
 function getAuthHeaders(): HeadersInit {
+  if (typeof window === 'undefined') {
+    return { 'Content-Type': 'application/json' }; // Return basic headers on server-side
+  }
   const token = localStorage.getItem('auth_token');
   return {
     'Content-Type': 'application/json',
