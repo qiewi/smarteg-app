@@ -161,15 +161,9 @@ export class GenAIService {
   /**
    * Generates an image based on the provided prompt using the image generation model.
    * @param prompt The prompt for image generation.
-   * @param getNewToken A function to get a fresh authentication token.
    * @returns A promise that resolves to the generated image data as base64 string.
    */
-  static async generateImage(prompt: string, getNewToken: () => Promise<{ name: string }>): Promise<string | null> {
-    // const freshToken = await getNewToken();
-    // if (!freshToken?.name) {
-    //   throw new Error("Could not get a valid token for image generation.");
-    // }
-
+  static async generateImage(prompt: string): Promise<string | null> {
     const genAI = new GoogleGenAI({ apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY });
 
     try {

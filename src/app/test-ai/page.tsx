@@ -1,15 +1,11 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { geminiAPI } from '../../lib/api';
 import { AIContextProvider, useAIEngine, useVoiceCommands } from '../../context/AIContextProvider';
 import { GenAIService } from '../../services/ai/GenAIService';
 import type { PredictionData } from '../../types/ai';
-
-const getNewToken = async () => {
-  const response = await geminiAPI.getToken();
-  return (response as any).data;
-};
 
 // Test component that uses the AI context
 function AITestComponent() {
@@ -32,10 +28,7 @@ function AITestComponent() {
   } = useVoiceCommands();
 
   const [predictionResult, setPredictionResult] = useState<PredictionData[] | null>(null);
-  const [predictionLoading, setPredictionLoading] = useState(false);
   
-  const [lastProcessedCommand, setLastProcessedCommand] = useState<any>(null);
-
   // Social Post Generation Test State
   const [socialPostLoading, setSocialPostLoading] = useState(false);
   const [socialPostResult, setSocialPostResult] = useState<string | null>(null);
@@ -74,7 +67,6 @@ function AITestComponent() {
   };
 
   const handleGetPrediction = async () => {
-    setPredictionLoading(true);
     setPredictionResult(null);
     try {
       // The generatePredictions function now requires the getNewToken function
@@ -85,8 +77,6 @@ function AITestComponent() {
       await (prediction.generatePredictions as any)(getNewToken);
     } catch (err) {
       console.error('Prediction failed:', err);
-    } finally {
-      setPredictionLoading(false);
     }
   };
 
@@ -100,7 +90,7 @@ function AITestComponent() {
       
       console.log('🖼️ Generating social post image with prompt:', imagePrompt);
       
-      const imageData = await GenAIService.generateImage(imagePrompt, getNewToken);
+      const imageData = await GenAIService.generateImage(imagePrompt);
       
       if (imageData) {
         setSocialPostResult(imageData);
@@ -267,9 +257,11 @@ function AITestComponent() {
                     </div>
                   ) : voiceSocialPostResult.imageData ? (
                     <div className="space-y-2">
-                      <img 
+                      <Image 
                         src={`data:image/png;base64,${voiceSocialPostResult.imageData}`}
                         alt={`Generated image of ${voiceSocialPostResult.menuName}`}
+                        width={400}
+                        height={300}
                         className="max-w-sm h-auto rounded-lg shadow-md border"
                       />
                       <p className="text-xs text-green-600">
@@ -438,9 +430,11 @@ function AITestComponent() {
         <div className="mt-4 bg-gray-50 p-4 rounded border">
           <h3 className="font-medium mb-2">Generated Social Post Image:</h3>
           <div className="space-y-4">
-            <img 
+            <Image 
               src={`data:image/png;base64,${socialPostResult}`}
               alt={`Generated image of ${menuName}`}
+              width={600}
+              height={400}
               className="max-w-full h-auto rounded-lg shadow-lg"
             />
             <div className="text-xs text-gray-600">

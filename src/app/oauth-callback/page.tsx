@@ -11,7 +11,6 @@ function OAuthCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
-  const [message, setMessage] = useState('');
 
   useEffect(() => {
     const handleOAuthCallback = async () => {
@@ -20,7 +19,6 @@ function OAuthCallbackContent() {
 
         if (error) {
           setStatus('error');
-          setMessage(`OAuth Error: ${error}`);
           return;
         }
 
@@ -48,7 +46,6 @@ function OAuthCallbackContent() {
           }
           
           setStatus('success');
-          setMessage('Authentication successful! Redirecting to dashboard...');
           
           // Redirect to home page after 2 seconds
           setTimeout(() => {
@@ -58,12 +55,10 @@ function OAuthCallbackContent() {
         } catch (tokenError) {
           console.error('Failed to get JWT token:', tokenError);
           setStatus('error');
-          setMessage('Failed to retrieve authentication token');
         }
 
       } catch (err) {
         setStatus('error');
-        setMessage('Failed to process authentication');
         console.error('OAuth callback error:', err);
       }
     };
@@ -73,10 +68,6 @@ function OAuthCallbackContent() {
 
   const handleRetry = () => {
     router.push('/login');
-  };
-
-  const handleManualRedirect = () => {
-    router.push('/home');
   };
 
   return (

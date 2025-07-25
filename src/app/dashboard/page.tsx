@@ -1,12 +1,12 @@
 "use client";
 
-import DashboardLayout from "@/components/dashboard/DashboardLayout";
+import DashboardLayout from "@/components/dashboard/PWALayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Plus, BarChart3, ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { getDailySales, getWeeklySales, getMonthlySales, SalesData, menuAPI } from "@/lib/api";
 
@@ -64,7 +64,7 @@ export default function DashboardPage() {
     });
   };
 
-  const fetchMenuData = async () => {
+  const fetchMenuData = useCallback(async () => {
     try {
       setMenuLoading(true);
       
@@ -118,7 +118,7 @@ export default function DashboardPage() {
     } finally {
       setMenuLoading(false);
     }
-  };
+  }, [selectedPeriod]);
 
   const fetchSalesDataForPeriod = async (period: "1D" | "1W" | "1M"): Promise<SalesData[]> => {
     if (period === "1D") {
@@ -133,7 +133,7 @@ export default function DashboardPage() {
     }
   };
 
-  const fetchSalesData = async (period: "1D" | "1W" | "1M") => {
+  const fetchSalesData = useCallback(async (period: "1D" | "1W" | "1M") => {
     setLoading(true);
     setError(null);
     
@@ -174,15 +174,15 @@ export default function DashboardPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchSalesData(selectedPeriod);
-  }, [selectedPeriod]);
+  }, [selectedPeriod, fetchSalesData]);
 
   useEffect(() => {
     fetchMenuData();
-  }, [selectedPeriod]); // Refetch menu data when period changes
+  }, [selectedPeriod, fetchMenuData]); // Refetch menu data when period changes
 
   const handlePeriodChange = (period: "1D" | "1W" | "1M") => {
     setSelectedPeriod(period);

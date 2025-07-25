@@ -1,6 +1,6 @@
 "use client";
 
-import DashboardLayout from "@/components/dashboard/DashboardLayout";
+import DashboardLayout from "@/components/dashboard/PWALayout";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -9,8 +9,6 @@ import {
   ArrowLeft, 
   Brain, 
   Package, 
-  Users, 
-  Tag, 
   TrendingUp, 
   Calendar, 
   CloudSun,
@@ -18,7 +16,6 @@ import {
   ChevronRight,
   Info,
   CheckCircle2,
-  AlertTriangle,
   RefreshCw
 } from "lucide-react";
 
@@ -111,7 +108,6 @@ export default function PredictionPage() {
     setError(null);
     
     try {
-      const testToken = await getNewToken();
       const predictions = await GenAIService.getSupplyPrediction(getNewToken);
       
       // Save to state
@@ -298,7 +294,7 @@ export default function PredictionPage() {
         setPredictionData(parsedData);
         setLastGenerated(parsedDate);
         setHasGenerated(true);
-      } catch (error) {
+      } catch {
         // Clear corrupted data
         localStorage.removeItem('warteg_predictions');
         localStorage.removeItem('warteg_predictions_timestamp');

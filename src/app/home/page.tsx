@@ -1,4 +1,4 @@
-import DashboardLayout from "@/components/dashboard/DashboardLayout";
+import DashboardLayout from "@/components/dashboard/PWALayout";
 import { Badge } from "@/components/ui/badge";
 import PortraitCard from "@/components/home/PortraitCard";
 import LandscapeCard from "@/components/home/LandscapeCard";

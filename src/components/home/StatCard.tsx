@@ -74,8 +74,6 @@ const getTextClasses = (type: StatCardProps["gradientType"]) => {
 export default function StatCard({
   title,
   description,
-  value,
-  subtitle,
   href,
   icon: Icon,
   gradientType,

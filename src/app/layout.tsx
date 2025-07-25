@@ -1,7 +1,15 @@
 import './globals.css'
 import type { Metadata, Viewport } from 'next'
+import { Instrument_Sans } from 'next/font/google'
 import { StagewiseToolbar } from '@stagewise/toolbar-next'
 import ReactPlugin from '@stagewise-plugins/react'
+
+const instrumentSans = Instrument_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  style: ['normal', 'italic'],
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
   title: 'Smarteg - Kurangi Limbah, Tingkatkan Efisiensi, Maksimalkan Pendapatan',
@@ -72,13 +80,7 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.ico" />
         <link rel="preload" href="/bg-hero.jpg" as="image" type="image/jpeg" />
         <link rel="preload" href="/bg-cta.jpg" as="image" type="image/jpeg" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap"
-          rel="stylesheet"
-        />
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -95,7 +97,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`font-instrument antialiased`}>
+      <body className={`${instrumentSans.className} antialiased`}>
         {children}
         <StagewiseToolbar 
           config={{

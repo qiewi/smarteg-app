@@ -1,6 +1,6 @@
 "use client";
 
-import DashboardLayout from "@/components/dashboard/DashboardLayout";
+import DashboardLayout from "@/components/dashboard/PWALayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { LogOut, Edit2, Check, X } from "lucide-react";

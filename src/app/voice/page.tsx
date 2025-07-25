@@ -2,12 +2,12 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Mic, Square, ArrowLeft, Download, X } from 'lucide-react';
+import { Mic, Square, Download, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
 import { geminiAPI } from '../../lib/api';
 import { AIContextProvider, useAIEngine, useVoiceCommands } from '../../context/AIContextProvider';
 import BottomNav from '../../components/common/BottomNav';
-import Link from 'next/link';
 
 // Voice Recording Component
 function VoiceRecordingComponent() {
@@ -15,7 +15,7 @@ function VoiceRecordingComponent() {
   const searchParams = useSearchParams();
   const autoStart = searchParams.get('autoStart') === 'true';
   
-  const { voice, isInitialized } = useAIEngine();
+  const { isInitialized } = useAIEngine();
   const { 
     startListening, 
     stopListening, 
@@ -52,7 +52,8 @@ function VoiceRecordingComponent() {
     if (autoStart && isInitialized && !isListening) {
       handleStartRecording();
     }
-  }, [autoStart, isInitialized]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoStart, isInitialized, isListening]);
 
   // Clear results when starting a new voice command (only clear popup, keep results visible)
   useEffect(() => {
@@ -81,7 +82,7 @@ function VoiceRecordingComponent() {
       // Generate the report using useVoiceCommands hook
       memoizedGenerateReport();
     }
-  }, [lastCommand]);
+  }, [lastCommand, memoizedGenerateReport]);
 
   // Debug reportData changes
   useEffect(() => {
@@ -93,14 +94,14 @@ function VoiceRecordingComponent() {
     console.log('🖼️ Voice social post result changed:', { voiceSocialPostResult, isGeneratingSocialPost, isProcessing });
   }, [voiceSocialPostResult, isGeneratingSocialPost, isProcessing]);
 
-  const handleStartRecording = async () => {
+  const handleStartRecording = useCallback(async () => {
     try {
       console.log('🎤 Starting voice recording...');
       await startListening();
     } catch (err) {
       console.error('❌ Failed to start recording:', err);
     }
-  };
+  }, [startListening]);
 
   const handleStopRecording = () => {
     try {
@@ -152,15 +153,6 @@ function VoiceRecordingComponent() {
         setShowDownloadPopup(false);
       });
     }
-  };
-
-  const getStatusText = () => {
-    if (error) return `Error: ${error}`;
-    if (isProcessing) return 'Memproses...';
-    if (isListening) return 'Mendengarkan...';
-    if (voice.isSpeaking) return 'Berbicara..';
-    if (!isInitialized) return 'Menyiapkan...';
-    return 'Siap melayani';
   };
 
   return (
@@ -335,9 +327,11 @@ function VoiceRecordingComponent() {
                       <p><strong>Debug:</strong> Image data length: {voiceSocialPostResult.imageData?.length || 0} characters</p>
                     </div>
                     <div className="flex justify-center">
-                      <img 
+                      <Image 
                         src={`data:image/png;base64,${voiceSocialPostResult.imageData}`}
                         alt={`Generated image of ${voiceSocialPostResult.menuName}`}
+                        width={400}
+                        height={300}
                         className="w-full max-w-md h-auto rounded-lg shadow-md border"
                         onLoad={() => console.log('✅ Image loaded successfully')}
                         onError={(e) => console.error('❌ Image failed to load:', e)}
@@ -557,9 +551,11 @@ function VoiceRecordingComponent() {
               <div className="mb-4 sm:mb-6">
                 {popupType === 'image' && popupData ? (
                   <div className="space-y-3 sm:space-y-4">
-                    <img 
+                    <Image 
                       src={`data:image/png;base64,${popupData.imageData}`}
                       alt={`Generated image of ${popupData.menuName}`}
+                      width={400}
+                      height={300}
                       className="w-full h-auto rounded-lg shadow-md border max-h-60 sm:max-h-80 object-cover"
                     />
                     <div className="text-sm text-gray-600">

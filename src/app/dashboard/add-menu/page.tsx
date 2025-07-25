@@ -1,6 +1,6 @@
 "use client";
 
-import DashboardLayout from "@/components/dashboard/DashboardLayout";
+import DashboardLayout from "@/components/dashboard/PWALayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, Check, ChefHat, AlertCircle, CheckCircle } from "lucide-react";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { menuAPI } from "@/lib/api";
@@ -199,10 +199,10 @@ export default function AddMenuPage() {
 
 
   // Handle success modal close and navigation
-  const handleSuccessModalClose = () => {
+  const handleSuccessModalClose = useCallback(() => {
     setShowSuccessModal(false);
     router.push('/dashboard');
-  };
+  }, [router]);
 
   // Auto-close success modal after 3 seconds
   useEffect(() => {
@@ -213,7 +213,7 @@ export default function AddMenuPage() {
       
       return () => clearTimeout(timer);
     }
-  }, [showSuccessModal]);
+  }, [showSuccessModal, handleSuccessModalClose]);
 
   // Prevent hydration mismatch
   if (!mounted) {

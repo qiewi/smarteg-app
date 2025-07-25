@@ -1,4 +1,4 @@
-import DashboardLayout from "@/components/dashboard/DashboardLayout";
+import DashboardLayout from "@/components/dashboard/PWALayout";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import WasteClient from "@/components/waste/WasteClient";

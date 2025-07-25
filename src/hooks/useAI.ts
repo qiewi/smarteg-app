@@ -14,7 +14,6 @@ import type {
   VoiceSettings,
   WebSocketMessage,
   PredictionData,
-  HistoricalSalesData,
   VoiceCommand
 } from '@/types/ai';
 
@@ -202,8 +201,6 @@ export function usePrediction(): UsePredictionReturn {
   const [predictions, setPredictions] = useState<PredictionData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const historicalDataRef = useRef<HistoricalSalesData[]>([]);
-  const menuItemsRef = useRef<string[]>([]);
 
   const generatePredictions = useCallback(async (getNewToken: () => Promise<{ name: string }>) => {
     setIsLoading(true);
@@ -377,7 +374,7 @@ export function useVoiceCommands(getNewToken: () => Promise<{ name: string }>) {
       const imagePrompt = `Create an appetizing, professional food photography image of ${menuName}, a delicious Indonesian dish. The image should be bright, colorful, and make the food look irresistible. ${status === 'ready' ? 'Show it as freshly prepared and ready to eat. With text saying "READY TO SERVE!"' : 'Show it with a subtle "sold out" overlay.'}`;
       
       console.log('🖼️ Generating social post image via voice command for:', menuName);
-      const imageData = await GenAIService.generateImage(imagePrompt, getNewToken);
+      const imageData = await GenAIService.generateImage(imagePrompt);
       
       // Store results for UI display
       setVoiceSocialPostResult({
@@ -411,7 +408,7 @@ export function useVoiceCommands(getNewToken: () => Promise<{ name: string }>) {
     } finally {
       setIsGeneratingSocialPost(false);
     }
-  }, [getNewToken]);
+  }, []);
 
   const processCommand = useCallback(async (commandText: string) => {
     if (!commandText) return;
@@ -476,7 +473,7 @@ export function useVoiceCommands(getNewToken: () => Promise<{ name: string }>) {
         setFinalTranscript("");
       }, 100);
     }
-  }, [getNewToken, speak]);
+  }, [getNewToken, speak, isListening, generateReport, generatePredictions, generateSocialPost]);
 
   useEffect(() => {
     if (finalTranscript && !isProcessing && finalTranscript.trim().length > 0) {
