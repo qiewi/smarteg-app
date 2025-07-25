@@ -135,8 +135,8 @@ Actions:
 - UNKNOWN: {"originalTranscript": string}
 
 Examples:
-"tambah stok ayam 20 potong" → {"action": "UPDATE_STOCK", "payload": [{"name": "ayam goreng", "counts": 20, "price": 18000}]}
-"catat pesanan 2 nasi telur" → {"action": "RECORD_SALE", "payload": [{"name": "nasi telur", "counts": 2}]}
+"stok ayam 20 potong" → {"action": "UPDATE_STOCK", "payload": [{"name": "ayam goreng", "counts": 20, "price": 18000}]}
+"pesanan 2 nasi telur" → {"action": "RECORD_SALE", "payload": [{"name": "nasi telur", "counts": 2}]}
 "rendang siap" → {"action": "SOCIAL_POST", "payload": {"name": "rendang", "status": "ready"}}
 "laporan harian" → {"action": "DAILY_REPORT", "payload": null}
 "prediksi stok" → {"action": "PREDICTION", "payload": null}
