@@ -38,12 +38,12 @@ export default function LoginPage() {
         </div>
 
         {/* Login Content - White background with rounded top corners */}
-        <div className="flex-1 bg-white rounded-t-3xl px-6 pb-8 pt-8">
+        <div className="flex-1 bg-white rounded-t-3xl px-6 pb-8 pt-3">
           <div className="max-w-sm space-y-6">
             
             {/* Separator above button */}
             <div className="flex items-center justify-center">
-              <div className="w-24 h-1 bg-gray-200 rounded-full"></div>
+              <div className="w-16 h-1 bg-gray-200 rounded-full"></div>
             </div>
             
             {/* Login Button */}
