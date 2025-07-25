@@ -22,24 +22,28 @@ const LoginButton = () => {
 
   return (
     <motion.div
-      whileHover={!isLoading ? { scale: 1.05 } : {}}
-      whileTap={!isLoading ? { scale: 0.95 } : {}}
+      whileHover={!isLoading ? { scale: 1.02 } : {}}
+      whileTap={!isLoading ? { scale: 0.98 } : {}}
+      className="w-full"
     >
       <Button 
         onClick={handleLogin}
         size="lg"
         disabled={isLoading}
-        className="w-full bg-primary hover:bg-primary/90 text-white shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed"
+        className="w-full h-14 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-semibold text-base shadow-lg shadow-primary-500/25 hover:shadow-xl hover:shadow-primary-500/30 transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed rounded-xl border-0 relative overflow-hidden group"
       >
+        {/* Background shine effect */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+        
         {isLoading ? (
-          <>
-            <div className="w-5 h-5 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            Menghubungkan...
-          </>
+          <div className="flex items-center justify-center relative z-10">
+            <div className="w-5 h-5 mr-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            <span>Menghubungkan...</span>
+          </div>
         ) : (
-          <>
+          <div className="flex items-center justify-center relative z-10">
             <svg 
-              className="w-5 h-5 mr-2" 
+              className="w-6 h-6 mr-3" 
               viewBox="0 0 24 24"
             >
               <path 
@@ -59,8 +63,8 @@ const LoginButton = () => {
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
               />
             </svg>
-            Masuk dengan Google
-          </>
+            <span>Masuk dengan Google</span>
+          </div>
         )}
       </Button>
     </motion.div>
