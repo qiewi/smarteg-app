@@ -12,7 +12,7 @@
 
 # testing
 /coverage
-test-ai
+# test-ai <-- Ini di comment out biar ada contoh page cara make useAI (~@Dama)
 
 # next.js
 /.next/
