@@ -8,11 +8,7 @@ import Image from 'next/image';
 import { geminiAPI } from '../../lib/api';
 import { AIContextProvider, useAIEngine, useVoiceCommands } from '../../context/AIContextProvider';
 import BottomNav from '../../components/common/BottomNav';
-<<<<<<< HEAD
-=======
 import { preparePdfContent } from '../../lib/utils';
-import Link from 'next/link';
->>>>>>> 3669eb593a3161bde948c71e96fe8d1a22f7bcd8
 
 // Voice Recording Component
 function VoiceRecordingComponent() {

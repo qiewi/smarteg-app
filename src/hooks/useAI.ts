@@ -516,11 +516,7 @@ export function useVoiceCommands(getNewToken: () => Promise<{ name: string }>) {
         console.log('🧹 Transcripts cleaned up');
       }, 100);
     }
-<<<<<<< HEAD
-  }, [getNewToken, speak, isListening, generateReport, generatePredictions, generateSocialPost]);
-=======
-  }, [getNewToken, speak, generateReport, generatePredictions, generateSocialPost, isListening, isProcessing, isGeneratingReport, isGeneratingSocialPost]);
->>>>>>> 3669eb593a3161bde948c71e96fe8d1a22f7bcd8
+  }, [getNewToken, speak, isListening, generateReport, generatePredictions, generateSocialPost, isProcessing, isGeneratingReport, isGeneratingSocialPost]);
 
   useEffect(() => {
     if (finalTranscript && !isProcessing && finalTranscript.trim().length > 0) {
@@ -545,7 +541,7 @@ export function useVoiceCommands(getNewToken: () => Promise<{ name: string }>) {
       if (recognitionRef.current) {
         VoiceProcessor.stopListening(recognitionRef.current);
       }
-    } catch (e) {
+    } catch {
       console.log('⚠️ Cleanup existing recognition (this is normal)');
     }
 
