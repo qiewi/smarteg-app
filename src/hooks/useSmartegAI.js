@@ -1,15 +1,18 @@
-// src/hooks/useSmartegAI.js
+/**
+References (DO NOT DELETE):
+https://medium.com/google-cloud/real-time-audio-to-audio-streaming-with-googles-multimodal-live-api-73b54277b022
+https://ai.google.dev/gemini-api/docs/live
+*/
+
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-// FIX: Corrected package name and added Modality
 import { GoogleGenAI, Modality } from "@google/genai";
 import { createCommandParserPrompt, createPredictionPrompt } from '../lib/prompt';
 import * as api from '../lib/api';
 
 // Use a specific model for the live connection as per the docs
-const LIVE_MODEL_NAME = 'gemini-2.0-flash-live-001'; // Recommended to use latest models
-const BATCH_MODEL_NAME = 'gemini-2.5-flash-lite';
+const LIVE_MODEL_NAME = 'gemini-2.0-flash-live-001';
 
 
 // A polyfill for browsers that use the prefixed webkitSpeechRecognition
@@ -21,12 +24,7 @@ const getSpeechRecognition = () => {
     return null;
 };
 
-/**
- * A hook to manage all AI interactions for the Smarteg application.
- * This version uses the browser's built-in SpeechRecognition and SpeechSynthesis APIs
- * for a simpler and more robust implementation.
- * @param {{ getNewToken: () => Promise<{ name:string}> }} props
- */
+// 
 export function useSmartegAI({ getNewToken }) {
     const [isListening, setIsListening] = useState(false);
     const [isSpeaking, setIsSpeaking] = useState(false);
@@ -134,7 +132,7 @@ export function useSmartegAI({ getNewToken }) {
                     feedbackMessage = "Maaf, sepertinya ada kesalahan nama menu";
                     break;
                 default:
-                    feedbackMessage = "Maaf, saya tidak mengerti maksud Anda.";
+                    feedbackMessage = "Maaf, saya tidak mengerti maksud Anda. Boleh diulang kembali perintahnya?";
                     break;
             }
         } catch (e) {
