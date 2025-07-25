@@ -99,6 +99,8 @@ export class GenAIService {
     const prompt = createCommandParserPrompt(transcript, ((menu_list as any).data as any)?.menu?.length >= 1 ? ((menu_list as any).data as any).menu : dummy_menu);
     const responseText = await this.getLiveResponse(prompt, getNewToken);
 
+    // setIsProcessing(false);
+
     // Clean up the response to get a valid JSON string
     const jsonString = responseText.replace(/```json|```/g, '').trim();
     return JSON.parse(jsonString);

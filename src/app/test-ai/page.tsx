@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { geminiAPI } from '../../lib/api';
 import { AIContextProvider, useAIEngine, useVoiceCommands } from '../../context/AIContextProvider';
 import { GenAIService } from '../../services/ai/GenAIService';
+import { preparePdfContent } from '../../lib/utils';
 import type { PredictionData } from '../../types/ai';
 
 const getNewToken = async () => {
@@ -116,23 +117,35 @@ function AITestComponent() {
     }
   };
   
-  const handleDownloadPdf = () => {
+  const handlePrintPdf = () => {
     if (reportData?.html) {
-      console.log('ℹ️ Preparing PDF download...');
-      const element = document.createElement('div');
-      element.innerHTML = reportData.html;
+      console.log('🖨️ Preparing PDF for printing...');
       
-      // Use html2pdf.js to generate and download the PDF
-      // @ts-ignore
-      html2pdf(element, {
-        margin:       1,
-        filename:     'daily_report.pdf',
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2 },
-        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
-      }).then(() => {
-        console.log('✅ PDF download initiated.');
-      });
+      try {
+        // Prepare HTML content with enhanced styling
+        const enhancedHtml = preparePdfContent(reportData.html);
+        
+        console.log('📝 HTML content length:', reportData.html.length);
+        console.log('🔍 Opening print window...');
+        
+        // Create a new window with the content
+        const printWindow = window.open('', '_blank');
+        if (printWindow) {
+          printWindow.document.write(enhancedHtml);
+          printWindow.document.close();
+          printWindow.focus();
+          printWindow.print();
+          printWindow.close();
+          
+          console.log('✅ Print dialog opened successfully');
+        } else {
+          throw new Error('Failed to open print window. Please allow popups for this site.');
+        }
+        
+      } catch (error) {
+        console.error('❌ Print failed:', error);
+        alert('Gagal membuka dialog cetak. Pastikan popup diizinkan untuk situs ini.');
+      }
     }
   };
 
@@ -361,10 +374,11 @@ function AITestComponent() {
               {reportData.text}
             </pre>
             <button
-              onClick={handleDownloadPdf}
-              className="mt-4 px-4 py-2 bg-green-600 text-white rounded"
+              onClick={handlePrintPdf}
+              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded flex items-center space-x-2"
             >
-              Download PDF
+              <span>🖨️</span>
+              <span>Cetak PDF</span>
             </button>
           </div>
         )}
