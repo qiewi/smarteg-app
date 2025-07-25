@@ -8,6 +8,11 @@ import Image from 'next/image';
 import { geminiAPI } from '../../lib/api';
 import { AIContextProvider, useAIEngine, useVoiceCommands } from '../../context/AIContextProvider';
 import BottomNav from '../../components/common/BottomNav';
+<<<<<<< HEAD
+=======
+import { preparePdfContent } from '../../lib/utils';
+import Link from 'next/link';
+>>>>>>> 3669eb593a3161bde948c71e96fe8d1a22f7bcd8
 
 // Voice Recording Component
 function VoiceRecordingComponent() {
@@ -134,24 +139,36 @@ function VoiceRecordingComponent() {
     }
   };
 
-  const handleDownloadPdf = () => {
+  const handlePrintPdf = () => {
     if (popupData && popupData.html) {
-      console.log('ℹ️ Preparing PDF download...');
-      const element = document.createElement('div');
-      element.innerHTML = popupData.html;
+      console.log('🖨️ Preparing PDF for printing...');
       
-      // Use html2pdf.js to generate and download the PDF
-      // @ts-ignore
-      html2pdf(element, {
-        margin: 1,
-        filename: `daily_report_${Date.now()}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-      }).then(() => {
-        console.log('✅ PDF download initiated.');
-        setShowDownloadPopup(false);
-      });
+      try {
+        // Prepare HTML content with enhanced styling
+        const enhancedHtml = preparePdfContent(popupData.html);
+        
+        console.log('📝 HTML content length:', popupData.html.length);
+        console.log('🔍 Opening print window...');
+        
+        // Create a new window with the content
+        const printWindow = window.open('', '_blank');
+        if (printWindow) {
+          printWindow.document.write(enhancedHtml);
+          printWindow.document.close();
+          printWindow.focus();
+          printWindow.print();
+          printWindow.close();
+          
+          console.log('✅ Print dialog opened successfully');
+          setShowDownloadPopup(false);
+        } else {
+          throw new Error('Failed to open print window. Please allow popups for this site.');
+        }
+        
+      } catch (error) {
+        console.error('❌ Print failed:', error);
+        alert('Gagal membuka dialog cetak. Pastikan popup diizinkan untuk situs ini.');
+      }
     }
   };
 
@@ -296,10 +313,11 @@ function VoiceRecordingComponent() {
           )}
 
           {/* Voice Social Post Result Display */}
-          {(voiceSocialPostResult || isGeneratingSocialPost) && (() => {
+          {(voiceSocialPostResult || isGeneratingSocialPost) && (!isProcessing || !isGeneratingSocialPost) && (() => {
             console.log('🎯 Rendering Voice Social Post section:', { 
               hasResult: !!voiceSocialPostResult, 
               isGenerating: isGeneratingSocialPost,
+              isProcessing: isProcessing,
               resultData: voiceSocialPostResult 
             });
             return true;
@@ -319,7 +337,7 @@ function VoiceRecordingComponent() {
                       <p className="text-sm">Harap tunggu, AI sedang menghasilkan gambar makanan yang menarik</p>
                     </div>
                   </div>
-                ) : voiceSocialPostResult && voiceSocialPostResult.imageData ? (
+                ) : voiceSocialPostResult?.imageData ? (
                   <div className="space-y-4">
                     <div className="text-sm text-green-700">
                       <p><strong>Menu:</strong> {voiceSocialPostResult.menuName}</p>
@@ -361,7 +379,15 @@ function VoiceRecordingComponent() {
           )}
 
           {/* Report Display */}
-          {(isGeneratingReport || reportData) && !isProcessing && (
+          {(isGeneratingReport || reportData) && (!isProcessing || !isGeneratingReport) && (() => {
+            console.log('📊 Rendering Report section:', { 
+              hasReportData: !!reportData, 
+              isGenerating: isGeneratingReport,
+              isProcessing: isProcessing,
+              reportData: reportData 
+            });
+            return true;
+          })() && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -417,8 +443,8 @@ function VoiceRecordingComponent() {
                         }}
                         className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg font-medium hover:opacity-90 transition-opacity space-x-2"
                       >
-                        <Download size={16} />
-                        <span>Download PDF</span>
+                        <span>🖨️</span>
+                        <span>Cetak PDF</span>
                       </button>
                     </div>
                   </div>
@@ -537,7 +563,7 @@ function VoiceRecordingComponent() {
               {/* Header */}
               <div className="flex items-center justify-between mb-4 sm:mb-6">
                 <h3 className="text-lg sm:text-xl font-bold text-gray-800">
-                  {popupType === 'image' ? 'Download Gambar' : 'Download Laporan'}
+                  {popupType === 'image' ? 'Download Gambar' : 'Cetak Laporan'}
                 </h3>
                 <button
                   onClick={() => setShowDownloadPopup(false)}
@@ -585,19 +611,30 @@ function VoiceRecordingComponent() {
               </div>
 
               {/* Actions */}
-              <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
+              <div className="flex flex-col space-y-2">
+                {popupType === 'pdf' && (
+                  <button
+                    onClick={handlePrintPdf}
+                    className="w-full px-4 py-2 sm:py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl font-medium hover:opacity-90 transition-opacity flex items-center justify-center space-x-2 text-sm sm:text-base"
+                  >
+                    <span>🖨️</span>
+                    <span>Cetak PDF</span>
+                  </button>
+                )}
+                {popupType === 'image' && (
+                  <button
+                    onClick={handleDownloadImage}
+                    className="w-full px-4 py-2 sm:py-3 bg-gradient-to-r from-primary to-accent text-white rounded-xl font-medium hover:opacity-90 transition-opacity flex items-center justify-center space-x-2 text-sm sm:text-base"
+                  >
+                    <Download size={16} className="sm:w-5 sm:h-5" />
+                    <span>Download Gambar</span>
+                  </button>
+                )}
                 <button
                   onClick={() => setShowDownloadPopup(false)}
-                  className="flex-1 px-4 py-2 sm:py-3 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors text-sm sm:text-base"
+                  className="w-full px-4 py-2 sm:py-3 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors text-sm sm:text-base"
                 >
                   Tutup
-                </button>
-                <button
-                  onClick={popupType === 'image' ? handleDownloadImage : handleDownloadPdf}
-                  className="flex-1 px-4 py-2 sm:py-3 bg-gradient-to-r from-primary to-accent text-white rounded-xl font-medium hover:opacity-90 transition-opacity flex items-center justify-center space-x-2 text-sm sm:text-base"
-                >
-                  <Download size={16} className="sm:w-5 sm:h-5" />
-                  <span>Download {popupType === 'image' ? 'Gambar' : 'PDF'}</span>
                 </button>
               </div>
             </motion.div>
