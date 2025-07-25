@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Mic, Square, ArrowLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { geminiAPI } from '../../lib/api';
-import { AIContextProvider, useAIEngine, useVoiceController } from '../../context/AIContextProvider';
+import { AIContextProvider, useAIEngine, useVoiceCommands } from '../../context/AIContextProvider';
 import BottomNav from '../../components/common/BottomNav';
 import Link from 'next/link';
 
@@ -24,7 +24,7 @@ function VoiceRecordingComponent() {
     transcript, 
     lastCommand, 
     error 
-  } = useVoiceController();
+  } = useVoiceCommands();
 
   // Auto-start recording when coming from catat button
   useEffect(() => {
